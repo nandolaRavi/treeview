@@ -1,0 +1,9 @@
+.highlightSelectedDir {
+    display: flex;
+}
+
+.highlights {
+    background-color: #F8F988;
+    padding: 6px;
+    border-radius: 3px;
+}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import InputLabel from '@mui/material/InputLabel';
@@ -7,16 +7,36 @@ import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import { useSelector } from 'react-redux';
 
-export const AddModal = () => {
+export const AddModal = ({ treeData }) => {
     const [selecteDir, setSelecteDir] = useState("");
     const [isSelecteDir, setIsSelecteDir] = useState(false);
     const [isDirName, setIsDirName] = useState(false);
     const [dirName, setDirName] = useState("");
+    const [fileConatin, setFileConatin] = useState('');
     const [show, setShow] = useState(false);
+    var dirArry = [];
+    var fileArry = [];
     const curPath = useSelector((state) => state.treeView.curPath);
-
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
+
+    // useEffect(() => {
+    //     getAllLable(treeData)
+    // }, [treeData, dirName, selecteDir, dirArry, fileArry]);
+
+    // const getAllLable = (data) => {
+    //     data.map((item) => {
+    //         if (!!item && item.type === '0') {
+    //             dirArry.push(item.label)
+    //         }
+    //         if (!!item && item.type === '1') {
+    //             fileArry.push(item.label)
+    //         }
+    //         if (item.children.length > 0) {
+    //             getAllLable(item.children)
+    //         }
+    //     })
+    // };
 
     const handleChange = (event) => {
         setSelecteDir(event.target.value);
@@ -43,21 +63,31 @@ export const AddModal = () => {
         } else {
             let dirType = selecteDir === "file" ? '1' : '0';
             let dirname = dirName.charAt(0).toUpperCase() + dirName.slice(1);
-            let newObj = {
-                name: dirname,
-                type: dirType,
-                currPath: curPath
+            let selectedType = dirType === '0' ? dirArry : fileArry;
+            if (selectedType.includes(dirname)) {
+                alert("already exist dir");
+                setShow(false)
+            } else {
+                let newObj = {
+                    name: dirname,
+                    type: dirType,
+                    currPath: curPath,
+                    description: fileConatin,
+                    created_At: new Date().toDateString(),
+                    isDelete: false
+                };
+                localStorage.setItem('newItem', JSON.stringify(newObj));
+                localStorage.setItem('lastupdatedate', new Date())
+                setShow(false);
             }
-            localStorage.setItem('newItem', JSON.stringify(newObj));
-            localStorage.setItem('lastupdatedate', new Date())
-            setShow(false);
+
         };
     };
 
     return (
         <>
             <Button variant="primary" onClick={handleShow} className="p-2">
-                Add
+                add
             </Button>
             <Modal show={show} onHide={handleClose}>
                 <Modal.Header closeButton>
@@ -83,7 +113,13 @@ export const AddModal = () => {
                         <input className="form-control " type="text" placeholder={`Enter dir name`} onChange={(e) => handleDirName(e)} />
                         {isDirName && <p className="mx-2 my-0 text-danger">please enter dir name</p>}
                     </div>
+                    {
 
+                        selecteDir == 'file' &&
+                        < div className="m-1 w-100">
+                            <textarea className="form-control " type="text" placeholder={`Enter file contains`} onChange={(e) => setFileConatin(e.target.value)} />
+                        </div>
+                    }
                 </Modal.Body>
                 <Modal.Footer>
                     <Button onClick={handleClose} className='text-white bg-danger'>Close</Button>
