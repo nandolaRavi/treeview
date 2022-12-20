@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import InputLabel from '@mui/material/InputLabel';
@@ -8,83 +8,59 @@ import Select from '@mui/material/Select';
 import { useSelector, useDispatch } from 'react-redux';
 import { createDir } from "../redux/reducers/treeViewSlice";
 
-export const AddModal = ({ treeData }) => {
+export const AddModal = () => {
     const [selecteDir, setSelecteDir] = useState("");
     const [isSelecteDir, setIsSelecteDir] = useState(false);
     const [isDirName, setIsDirName] = useState(false);
     const [dirName, setDirName] = useState("");
     const [fileConatin, setFileConatin] = useState('');
     const [show, setShow] = useState(false);
-    var dirArry = [];
-    var fileArry = [];
-    const dispatch =  useDispatch()
+    const dispatch = useDispatch()
     const curPath = useSelector((state) => state.treeView.curPath);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
-    // useEffect(() => {
-    //     getAllLable(treeData)
-    // }, [treeData, dirName, selecteDir, dirArry, fileArry]);
-
-    // const getAllLable = (data) => {
-    //     data.map((item) => {
-    //         if (!!item && item.type === '0') {
-    //             dirArry.push(item.label)
-    //         }
-    //         if (!!item && item.type === '1') {
-    //             fileArry.push(item.label)
-    //         }
-    //         if (item.children.length > 0) {
-    //             getAllLable(item.children)
-    //         }
-    //     })
-    // };
-
-    const handleChange = (event) => {
+    const handleChange = useCallback((event) => {
         setSelecteDir(event.target.value);
         if (event.target.value === '') {
             setIsSelecteDir(true);
         } else {
             setIsSelecteDir(false)
         };
-    };
+    }, [setSelecteDir, setIsSelecteDir]);
 
-    const handleDirName = (event) => {
+
+    const handleDirName = useCallback((event) => {
         setDirName(event.target.value);
-        if (dirName === "") {
+        if (event.target.value === "") {
             setIsDirName(true);
         } else {
             setIsDirName(false);
         };
-    };
+    }, [setDirName, setIsDirName]);
 
-    const createItem = () => {
+    //  Create a new Dir or filesu
+    const createItem = useCallback(() => {
         if (dirName === "" || selecteDir === "") {
             setIsDirName(true);
             setIsSelecteDir(true);
         } else {
             let dirType = selecteDir === "file" ? '1' : '0';
             let dirname = dirName.charAt(0).toUpperCase() + dirName.slice(1);
-            let selectedType = dirType === '0' ? dirArry : fileArry;
-            if (selectedType.includes(dirname)) {
-                alert("already exist dir");
-                setShow(false)
-            } else {
-                let newObj = {
-                    name: dirname,
-                    type: dirType,
-                    currPath: curPath,
-                    description: fileConatin,
-                    created_At: new Date().toDateString(),
-                    isDelete: false
-                };
-                dispatch(createDir(newObj));
-                 localStorage.setItem('lastupdatedate', new Date())
-                setShow(false);
-            }
 
-        };
-    };
+            let newObj = {
+                name: dirname,
+                type: dirType,
+                currPath: curPath,
+                description: fileConatin,
+                created_At: new Date().toDateString(),
+                isDelete: false
+            };
+            dispatch(createDir(newObj));
+            localStorage.setItem('lastupdatedate', new Date())
+            setShow(false);
+        }
+    }, [setShow, dispatch, setIsDirName, setIsSelecteDir, selecteDir, dirName]);
 
     return (
         <>

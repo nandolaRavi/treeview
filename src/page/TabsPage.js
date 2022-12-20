@@ -7,9 +7,7 @@ import TrashData from "./trashTree"
 import Tree from './Tree';
 const TabsPage = ({ treeData }) => {
   const [key, setKey] = useState('home');
-  const serachKeyitem = useSelector((state) => state.treeView.searchKeyWord);
   const curPath = useSelector((state) => state.treeView.curPath);
-  const searchKeyWord = useSelector((state) => state.treeView.searchKeyWord);
   const data = filterDir(treeData);
   const serachKeyWord = useSelector((state) => state.treeView.serachKeyWord);
 

@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { setPath, setType, setEditSourePath, setView, restoreDir, findDirByPath } from "../redux/reducers/treeViewSlice"
 import { FaFolderOpen, FaFile } from "react-icons/fa";
 import { FaTrashRestore } from "react-icons/fa";
@@ -10,26 +10,16 @@ const TrashTreeNode = ({ node, data }) => {
     const curPath = useSelector((state) => state.treeView.curPath);
     let istrash = label == "Home" ? false : true
     const icons = [<FaFolderOpen />, <FaFile />];
-
     const dispatch = useDispatch();
-    const handleClick = () => {
+
+    const handleClick = useCallback(() => {
         dispatch(setType({ type: type }));
         dispatch(setPath({ path: path }));
-    };
+    }, [dispatch]);
 
-
-    const viewSelecteFile = (path) => {
-        dispatch(setView(true))
-        dispatch(setEditSourePath({ path: path, }))
-    }
-
-    // const restoreItem = (curPath) => {
-    //     dispatch(setView(false))
-    //     dispatch(restoreDir({ path: curPath }));
-    // }
-    const reStoreItem = (path) => {
+    const reStoreItem = useDispatch((path) => {
         dispatch(restoreDir({ path: path }));
-    };
+    }, [dispatch]);
 
     return (
         <>
@@ -54,7 +44,7 @@ const TrashTreeNode = ({ node, data }) => {
 
                 isDelete == istrash &&
                 <div style={{ paddingLeft: "10px" }}>
-                    <TrashData treeData={children} />   
+                    <TrashData treeData={children} />
                 </div>
             }
         </>

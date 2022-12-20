@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import { editDir } from "../redux/reducers/treeViewSlice"
 import Offcanvas from 'react-bootstrap/Offcanvas';
@@ -18,12 +18,12 @@ export const EditView = ({ path }) => {
 
     const dishpatch = useDispatch()
 
-    const handleDirName = (event) => {
+    const handleDirName = useCallback((event) => {
         setIsEdit(true)
         setDirName(event.target.value);
-    };
+    }, [setIsEdit, setDirName]);
 
-    const createItem = () => {
+    const createItem = useCallback(() => {
         let dirname = dirName.charAt(0).toUpperCase() + dirName.slice(1);
         let newObj = {
             name: dirname == '' ? selectedDirData.label : dirname,
@@ -33,11 +33,12 @@ export const EditView = ({ path }) => {
         dishpatch((editDir(newObj)))
         //localStorage.setItem('newItem', JSON.stringify(newObj));
         //localStorage.setItem('lastupdatedate', new Date())
-    };
-    const handleDescription = (e) => {
+    }, [dirName, selectedDirData, dishpatch, curPath, fileConatin]);
+
+    const handleDescription = useCallback((e) => {
         setIsEdit(true);
         setFileConatin(e.target.value);
-    }
+    }, [setIsEdit, setFileConatin])
 
     return (
         <>

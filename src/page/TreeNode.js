@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import Tree from "./Tree";
 import { useDispatch, useSelector } from "react-redux";
 import { setPath, setType, deleteDir, setView, setEditSourePath } from "../redux/reducers/treeViewSlice"
@@ -17,26 +17,27 @@ const TreeNode = ({ node, currEditObject }) => {
     const icons = [<FaFolderOpen />, <FaFile />];
 
     const dispatch = useDispatch();
-    const handleClick = () => {
+
+    const handleClick = useCallback(() => {
         setShowChildren(!showChildren);
         dispatch(setType({ type: type }));
         dispatch(setPath({ path: path }));
-    };
+    }, [setShowChildren, dispatch]);
 
-    const viewSelecteFile = (path) => {
+    const viewSelecteFile = useDispatch((path) => {
         dispatch(setEditSourePath({ path: path }))
-    }
+    }, [dispatch])
 
-    const deleteItem = (curPath) => {
+    const deleteItem = useCallback((curPath) => {
         dispatch(setView(false))
         dispatch(deleteDir({ path: curPath }));
         dispatch(setPath({ path: node.parentpath }));
+    }, [dispatch])
 
-    }
-
-    const handlePath = (path) => {
+    const handlePath = useCallback((path) => {
         dispatch(setPath({ path: path }));
-    }
+    }, [dispatch]);
+    
     return (
         <>
             <div style={{ marginBottom: "5px" }} onClick={() => { handlePath(path) }}>
