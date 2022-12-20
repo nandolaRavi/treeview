@@ -5,7 +5,8 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { createDir } from "../redux/reducers/treeViewSlice";
 
 export const AddModal = ({ treeData }) => {
     const [selecteDir, setSelecteDir] = useState("");
@@ -16,6 +17,7 @@ export const AddModal = ({ treeData }) => {
     const [show, setShow] = useState(false);
     var dirArry = [];
     var fileArry = [];
+    const dispatch =  useDispatch()
     const curPath = useSelector((state) => state.treeView.curPath);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
@@ -76,8 +78,8 @@ export const AddModal = ({ treeData }) => {
                     created_At: new Date().toDateString(),
                     isDelete: false
                 };
-                localStorage.setItem('newItem', JSON.stringify(newObj));
-                localStorage.setItem('lastupdatedate', new Date())
+                dispatch(createDir(newObj));
+                 localStorage.setItem('lastupdatedate', new Date())
                 setShow(false);
             }
 

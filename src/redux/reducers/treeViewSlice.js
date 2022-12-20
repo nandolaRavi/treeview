@@ -1,7 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
 var updateData = {};
-var copyDirObj = {};
+export var copyDirObj = {};
 var existsFileCount = 0;
+export var isOPenAlert = false
 
 const createFileItem = (path, name, type, description) => {
     return {
@@ -54,6 +55,9 @@ export const findDirObj = (path, items = []) => {
     };
     return null;
 };
+
+window.findDir = findDirObj;
+
 export const findDirArray = (path, items = []) => {
     let array = []
     for (let i = 0; i < items.length; i++) {
@@ -182,16 +186,56 @@ const findExisFile = (path, items = []) => {
             findExisFile(path, item.children)
         }
     }
+};
+
+const removeChildren = (path, items) => {
+    debugger
+    for (let i = 0; i < items.length; i++) {
+        let item = items[i];
+        if (item.path === path) {
+            item.children = [];
+            return item
+        }
+        if (item.children && Array.isArray(item.children) && item.children.length > 0) {
+            let res = removeChildren(path, item.children);
+            if (res != null) {
+                return res;
+            };
+        };
+    };
+    return null;
+}
+const findExistDir = (items = {}, lable) => {
+    debugger
+    for (let i = 0; i < items.children.length; i++) {
+        let item = items.children[i];
+        if (item.label === lable) {
+            isOPenAlert = true
+            return item
+        }
+        if (item.children && Array.isArray(item.children) && item.children.length > 0) {
+            let res = findExistDir(item.children, lable);
+            if (res != null) {
+                return res;
+            };
+        };
+
+    }
 }
 const initialState = {
     curPath: 'Home',
     currTab: 'home',
     currType: 'Home',
     setView: false,
+
+    sourcePath: '',//this will have path when you copy something
+    destinationPath: '',
+
     serachKeyWord: '',
     currCopyObj: {},
     viewCurrDir: {},
     currLable: 'Home',
+    isConflict: false,
     files: [
         {
             label: "Home",
@@ -200,7 +244,6 @@ const initialState = {
             isDelete: false,
             parentpath: null,
             children: [
-                cretaeFolder('Home', 'Test', '', new Date().toString(), false)
             ]
         },
     ],
@@ -217,13 +260,17 @@ const treeViewSlice = createSlice({
             state.currType = action.payload.type;
         },
         createDir: (state, action) => {
-            const newPath = JSON.parse(localStorage.getItem('newItem'))?.currPath;
-            let target = findDir(newPath, state.files);
-            if (!!Array.isArray(target)) {
-                target.push(createFileItem(newPath, action.payload.name, action.payload.type, action.payload.description, action.payload.created_At));
+            let currObj = findDirObj(state.curPath, state.files);
+            if (!currObj.children.map(t => t.label).includes(action.payload.name)) {
+                let target = findDir(state.curPath, state.files);
+                if (!!Array.isArray(target)) {
+                    target.push(createFileItem(state.curPath, action.payload.name, action.payload.type, action.payload.description, action.payload.created_At));
+                } else {
+                    alert("facing error to create dir path:" + state.curPath);
+                };
             } else {
-                alert("facing error to create dire path:" + newPath);
-            };
+                alert("already existsdir in:" + state.curPath)
+            }
         },
         setCurTab: (state, action) => {
             state.currTab = action.payload.currTab
@@ -249,22 +296,73 @@ const treeViewSlice = createSlice({
             copyDirObj = action.payload.currObj;
             state.curPath = action.payload.path
         },
+
         pasteDir: (state, action) => {
-            const objCopy = { ...copyDirObj };
-            let target = findDir(action.payload.currObj.path, state.files);
-            findExisFile(action.payload.currObj.path, state.files);
-            if (copyDirObj.type == '1') {
-                let extistFileLabel = `${copyDirObj.label + `(${existsFileCount})`}`
-                objCopy.label = extistFileLabel
+            state.destinationPath = action.payload.path;
+            let sourceFileObject = findDirObj(state.sourcePath, state.files);
+            let sourceFileObjectCopy = JSON.parse(JSON.stringify(sourceFileObject));
+            if (!sourceFileObjectCopy) {
+                alert("Error : invalid source path");
+                return;
             }
-            if (target == null) {
-                alert("First copy or cut dir")
+            let destinationFileObject = findDirObj(state.destinationPath, state.files);
+            let destChild = destinationFileObject.children.find((fObj) => {
+                return fObj.label === sourceFileObjectCopy.label;
+            })
+            sourceFileObjectCopy.path = destinationFileObject.path + '/' + sourceFileObjectCopy.label;
+
+            if (sourceFileObjectCopy.children.length > 0) {
+                for (let i = 0; i < sourceFileObjectCopy.children.length; i++) {
+                    const element = sourceFileObjectCopy.children[i];
+                    element.path = sourceFileObjectCopy.path + '/' + element.label;
+                };
+            };
+
+            if (destChild) {
+                state.isConflict = true;
+                return;
+            };
+            destinationFileObject.children.push(sourceFileObjectCopy);
+        },
+
+        mergeDir: (state, action) => {
+            let sourceFileObject = findDirObj(state.sourcePath, state.files);
+            let sourceFileObjectCopy = JSON.parse(JSON.stringify(sourceFileObject));
+            if (!sourceFileObjectCopy) {
+                alert("Error : invalid source path");
+                return;
             }
-            if (copyDirObj.type == '0' && copyDirObj.path === action.payload.path) {
-                alert(`${copyDirObj.label} already exist dir`);
-            } else {
-                target.push(objCopy)
+            let destinationFileObject = findDirObj(state.destinationPath, state.files);
+
+            let destChild = destinationFileObject.children.find((fObj) => {
+                return fObj.label === sourceFileObjectCopy.label;
+            });
+
+            for (let i = 0; i < sourceFileObjectCopy.children.length; i++) {
+                const element = sourceFileObjectCopy.children[i];
+                if (!destChild.children.map(t => t.label).includes(element.label)) {
+                    element.path = destChild.path + '/' + sourceFileObjectCopy.children[i].label;
+                    destChild.children.push(element);
+                };
+            };
+        },
+
+        replaseDir: (state, action) => {
+            let destObj = findDirObj(state.destinationPath, state.files);
+            if (!!destObj) {
+                let srcObj = findDirObj(state.sourcePath, state.files);
+                let sourceFileObjectCopy = JSON.parse(JSON.stringify(srcObj));
+                let conflictObj = destObj.children.find(t => { return t.lable == sourceFileObjectCopy.lable });
+                sourceFileObjectCopy.children.forEach(t => {
+                    t.path = conflictObj.path + '/' + t.label;
+                });
+                conflictObj.children = sourceFileObjectCopy.children;
             }
+        },
+
+        //this will set the source path from where we want to copy data
+        setCopySourcePath: (state, action) => {
+            state.sourcePath = action.payload
         },
         setView: (state, action) => {
             state.setView = action.payload
@@ -272,6 +370,6 @@ const treeViewSlice = createSlice({
     },
 })
 
-export const { setPath, createDir, setType, deleteDir, copyDir, cutDir, pasteDir, setCurTab, searchDir, editDir, getDataByCurrPath, setView, restoreDir, setTrasbin } = treeViewSlice.actions;
+export const { setPath, setCopySourcePath, createDir, replaseDir, mergeDir, setType, deleteDir, checkConfing, copyDir, cutDir, pasteDir, setCurTab, searchDir, editDir, getDataByCurrPath, setView, restoreDir, setTrasbin } = treeViewSlice.actions;
 
 export default treeViewSlice.reducer;
