@@ -56,8 +56,6 @@ export const findDirObj = (path, items = []) => {
     return null;
 };
 
-window.findDir = findDirObj;
-
 export const findDirArray = (path, items = []) => {
     let array = []
     for (let i = 0; i < items.length; i++) {
@@ -118,7 +116,6 @@ export const filterDir = (items = []) => {
 };
 
 const deleteFileItem = (path, items = []) => {
-    debugger
     for (let i = 0; i < items.length; i++) {
         let item = items[i];
         if (item.path === path) {
@@ -144,6 +141,7 @@ const selectedDirEdit = (path, items = []) => {
         const item = items[i];
         if (item.path === path) {
             item.label = updateData.name;
+            item.path = item.parentpath + '/' + updateData.name
             item.description = updateData.description;
             item.updated_At = new Date().toDateString();
         } else if (item.children.length > 0) {
@@ -188,40 +186,6 @@ const findExisFile = (path, items = []) => {
     }
 };
 
-const removeChildren = (path, items) => {
-    debugger
-    for (let i = 0; i < items.length; i++) {
-        let item = items[i];
-        if (item.path === path) {
-            item.children = [];
-            return item
-        }
-        if (item.children && Array.isArray(item.children) && item.children.length > 0) {
-            let res = removeChildren(path, item.children);
-            if (res != null) {
-                return res;
-            };
-        };
-    };
-    return null;
-}
-const findExistDir = (items = {}, lable) => {
-    debugger
-    for (let i = 0; i < items.children.length; i++) {
-        let item = items.children[i];
-        if (item.label === lable) {
-            isOPenAlert = true
-            return item
-        }
-        if (item.children && Array.isArray(item.children) && item.children.length > 0) {
-            let res = findExistDir(item.children, lable);
-            if (res != null) {
-                return res;
-            };
-        };
-
-    }
-}
 const initialState = {
     curPath: 'Home',
     currTab: 'home',
@@ -282,10 +246,10 @@ const treeViewSlice = createSlice({
             resstoreFileItem(action.payload.path, state.files);
         },
         editDir: (state, action) => {
-            updateData = action.payload
+            updateData = action.payload;
             selectedDirEdit(action.payload.currPath, state.files);
         },
-        getDataByCurrPath: (state, action) => {
+        setEditSourePath: (state, action) => {
             let target = selectedViewDir(action.payload.path, state.files);
             state.viewCurrDir = target;
         },
@@ -298,9 +262,11 @@ const treeViewSlice = createSlice({
         },
 
         pasteDir: (state, action) => {
+            let existFileCount = 0
             state.destinationPath = action.payload.path;
             let sourceFileObject = findDirObj(state.sourcePath, state.files);
             let sourceFileObjectCopy = JSON.parse(JSON.stringify(sourceFileObject));
+
             if (!sourceFileObjectCopy) {
                 alert("Error : invalid source path");
                 return;
@@ -318,14 +284,23 @@ const treeViewSlice = createSlice({
                 };
             };
 
-            if (destChild) {
+            for (let j = 0; j < destinationFileObject.children.length; j++) {
+                const element = destinationFileObject.children[j];
+                if (element.type === '1' && element.label === sourceFileObjectCopy.label)
+                    existFileCount = existFileCount + 1
+                if (existFileCount > 0) {
+                    sourceFileObjectCopy.label = sourceFileObject.label + `(${existFileCount})`;
+                }
+            }
+
+            if (destChild && destChild.type === '0') {
                 state.isConflict = true;
                 return;
             };
             destinationFileObject.children.push(sourceFileObjectCopy);
         },
 
-        mergeDir: (state, action) => {
+        mergeDir: (state) => {
             let sourceFileObject = findDirObj(state.sourcePath, state.files);
             let sourceFileObjectCopy = JSON.parse(JSON.stringify(sourceFileObject));
             if (!sourceFileObjectCopy) {
@@ -347,17 +322,21 @@ const treeViewSlice = createSlice({
             };
         },
 
-        replaseDir: (state, action) => {
+        replaseDir: (state) => {
             let destObj = findDirObj(state.destinationPath, state.files);
             if (!!destObj) {
                 let srcObj = findDirObj(state.sourcePath, state.files);
                 let sourceFileObjectCopy = JSON.parse(JSON.stringify(srcObj));
-                let conflictObj = destObj.children.find(t => { return t.lable == sourceFileObjectCopy.lable });
+                let conflictObj = destObj.children.find(t => { return t.label == sourceFileObjectCopy.label });
                 sourceFileObjectCopy.children.forEach(t => {
                     t.path = conflictObj.path + '/' + t.label;
                 });
-                conflictObj.children = sourceFileObjectCopy.children;
-            }
+                for (let i = 0; i < sourceFileObjectCopy.children.length; i++) {
+                    const element = sourceFileObjectCopy.children[i];
+                    element.path = conflictObj.path + '/' + sourceFileObjectCopy.children[i].label;
+                };
+                conflictObj.children = sourceFileObjectCopy.children
+            };
         },
 
         //this will set the source path from where we want to copy data
@@ -370,6 +349,6 @@ const treeViewSlice = createSlice({
     },
 })
 
-export const { setPath, setCopySourcePath, createDir, replaseDir, mergeDir, setType, deleteDir, checkConfing, copyDir, cutDir, pasteDir, setCurTab, searchDir, editDir, getDataByCurrPath, setView, restoreDir, setTrasbin } = treeViewSlice.actions;
+export const { setPath, setCopySourcePath, createDir, replaseDir, mergeDir, setType, deleteDir, checkConfing, copyDir, cutDir, pasteDir, setCurTab, searchDir, editDir, setEditSourePath, setView, restoreDir, setTrasbin } = treeViewSlice.actions;
 
 export default treeViewSlice.reducer;

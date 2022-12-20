@@ -42,7 +42,7 @@ const Home = () => {
             const { children, ...itemWithoutChildren } = item;
             return item.label?.toLowerCase().includes(query.toLowerCase()) ? [...acc, itemWithoutChildren] : acc
         }, []) : arr
-    }, [setTreeData]);
+    }, [items]);
 
     const searchFileItem = useCallback((text) => {
         setTreeData(filterBy(items, text));

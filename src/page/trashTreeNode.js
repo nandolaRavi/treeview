@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import { useState } from "react";
-import { setPath, setType, getDataByCurrPath, setView, restoreDir, findDirByPath } from "../redux/reducers/treeViewSlice"
+import { setPath, setType, setEditSourePath, setView, restoreDir, findDirByPath } from "../redux/reducers/treeViewSlice"
 import { FaFolderOpen, FaFile } from "react-icons/fa";
 import { FaTrashRestore } from "react-icons/fa";
 import TrashData from "./trashTree";
@@ -20,7 +20,7 @@ const TrashTreeNode = ({ node, data }) => {
 
     const viewSelecteFile = (path) => {
         dispatch(setView(true))
-        dispatch(getDataByCurrPath({ path: path, }))
+        dispatch(setEditSourePath({ path: path, }))
     }
 
     // const restoreItem = (curPath) => {

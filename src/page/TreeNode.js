@@ -1,23 +1,20 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Tree from "./Tree";
 import { useDispatch, useSelector } from "react-redux";
-import { setPath, setType, deleteDir, getDataByCurrPath, setView } from "../redux/reducers/treeViewSlice"
-import { FaFolderOpen, FaFile, FaSortDown } from "react-icons/fa";
-import { FaTrashAlt, FaEllipsisV } from "react-icons/fa";
+import { setPath, setType, deleteDir, setView, setEditSourePath } from "../redux/reducers/treeViewSlice"
+import { FaFolderOpen, FaFile } from "react-icons/fa";
+import { FaTrashAlt } from "react-icons/fa";
 import ContextMenu from "./menu"
 import { Button } from "react-bootstrap";
 import { FiChevronDown } from "react-icons/fi";
 import EditView from "./EditView";
 import "../css/TreeNode.css"
 
-const TreeNode = ({ node }) => {
+const TreeNode = ({ node, currEditObject }) => {
     const serachKeyWord = useSelector((state) => state.treeView.serachKeyWord);
     const { children, label, path, type, isDelete } = node;
     const [showChildren, setShowChildren] = useState(true);
-    const [isShowMenu, setIsShowMenu] = useState(false);
-    // const [isDeletedDir, setisDeletedDir] = useState(false)
     const icons = [<FaFolderOpen />, <FaFile />];
-
 
     const dispatch = useDispatch();
     const handleClick = () => {
@@ -25,9 +22,9 @@ const TreeNode = ({ node }) => {
         dispatch(setType({ type: type }));
         dispatch(setPath({ path: path }));
     };
+
     const viewSelecteFile = (path) => {
-        dispatch(setView(true))
-        dispatch(getDataByCurrPath({ path: path }))
+        dispatch(setEditSourePath({ path: path }))
     }
 
     const deleteItem = (curPath) => {
@@ -60,15 +57,13 @@ const TreeNode = ({ node }) => {
                                             <FaTrashAlt onClick={() => deleteItem(path)} className="delete-item-button text-white" /></Button>
                                         }
                                     </div>
-                                    <div onClick={()=> viewSelecteFile(path)}>
+                                    <div onClick={() => viewSelecteFile(path)}>
                                         {path !== 'Home' && <Button variant="info">
-                                            <EditView className="view-item-button bg-info" /></Button>
+                                            <EditView className="view-item-button bg-info" currEditObject={currEditObject} /></Button>
                                         }
                                     </  div>
                                     <div className="mx-2">
-                                        {
-                                            path !== 'Home' && <Button><ContextMenu currObj={node} path={path} /></Button>
-                                        }
+                                        <Button><ContextMenu currObj={node} path={path} /></Button>
                                     </div>
                                 </div>
                             </div>

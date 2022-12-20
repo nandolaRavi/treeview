@@ -41,7 +41,7 @@ export const EditView = ({ path }) => {
 
     return (
         <>
-            <FaEye onClick={handleShow} className='text-white fs-5' />
+            <FaEye onClick={handleShow} className='text-white fs-4' />
             <Offcanvas show={show} onHide={handleClose} backdrop="static" placement={'end'}>
                 <Offcanvas.Header closeButton>
                     <Offcanvas.Title>Edit Info</Offcanvas.Title>
