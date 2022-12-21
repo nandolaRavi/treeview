@@ -1,15 +1,13 @@
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
-import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { filterDir } from '../redux/reducers/treeViewSlice';
-import TrashData from "./trashTree"
+import React, { useState } from 'react';
+import { filterDeleletdItem } from '../redux/reducers/treeViewSlice';
 import Tree from './Tree';
+import Recybin from './Recybin';
+
 const TabsPage = ({ treeData }) => {
   const [key, setKey] = useState('home');
-  const curPath = useSelector((state) => state.treeView.curPath);
-  const data = filterDir(treeData);
-  const serachKeyWord = useSelector((state) => state.treeView.serachKeyWord);
+  const trashData = filterDeleletdItem(treeData);
 
   return (
     <Tabs
@@ -18,10 +16,10 @@ const TabsPage = ({ treeData }) => {
       onSelect={(k) => setKey(k)}
       className="mb-3">
       <Tab eventKey="home" title="Home">
-        <Tree data={treeData} currPath={curPath} serachKeyWord={serachKeyWord} />
+        <Tree treeData={treeData} />
       </Tab>
       <Tab eventKey="trash" title="Trash">
-        <TrashData treeData={data} path={curPath} />
+        <Recybin trashData={trashData} />
       </Tab>
     </Tabs >
   );

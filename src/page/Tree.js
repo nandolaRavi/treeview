@@ -1,9 +1,9 @@
 import TreeNode from "./TreeNode"
-const Tree = ({ data, currPath }) => {
+const Tree = ({ treeData }) => {
   return (
     <ul>
-      {data.map((node, index) => (
-        <TreeNode node={node} key={index} currPath={currPath} />
+      {treeData.map((node, index) => (
+        <TreeNode node={node} key={index} />
       ))}
     </ul>
   )

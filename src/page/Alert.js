@@ -1,18 +1,23 @@
+import { useCallback } from "react";
 import { Button, Modal } from "react-bootstrap";
-import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { mergeDir, replaseDir } from "../redux/reducers/treeViewSlice";
+const AlertModal = (props) => {
+    const dispatch = useDispatch();
 
-function AlertModal(props) {
-    const isConflict = useSelector((state) => state.treeView.isConflict);
+    const handleMerge = useCallback(() => {
+        dispatch(mergeDir());
+    }, [dispatch]);
 
-    const onMarge = () => {
+    const handleRepalse = useCallback(() => {
+        dispatch(replaseDir())
+    }, [dispatch]);
 
-    }
     return (
         <Modal
-            {...props}
             size="lg"
             aria-labelledby="contained-modal-title-vcenter"
-            centered
+            show={true}
         >
             <Modal.Header closeButton>
                 <Modal.Title id="contained-modal-title-vcenter">
@@ -20,11 +25,13 @@ function AlertModal(props) {
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <h4>Centered Modal</h4>
+                <h4>
+                    File or folder already exist on destination path,
+                </h4>
             </Modal.Body>
             <Modal.Footer>
-                <Button onClick={() => onMarge()}>Mareg</Button>
-                <Button onClick={props.onHide}>replase</Button>
+                <Button onClick={handleMerge()} className='btn btn-primary'>Mareg</Button>
+                <Button onClick={handleRepalse()} className='btn btn-secondary'>Replase</Button>
 
             </Modal.Footer>
         </Modal>

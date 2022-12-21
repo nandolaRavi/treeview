@@ -9,98 +9,77 @@ import { useSelector, useDispatch } from 'react-redux';
 import { createDir } from "../redux/reducers/treeViewSlice";
 
 export const AddModal = () => {
-    const [selecteDir, setSelecteDir] = useState("");
-    const [isSelecteDir, setIsSelecteDir] = useState(false);
-    const [isDirName, setIsDirName] = useState(false);
-    const [dirName, setDirName] = useState("");
-    const [fileConatin, setFileConatin] = useState('');
-    const [show, setShow] = useState(false);
-    const dispatch = useDispatch()
     const curPath = useSelector((state) => state.treeView.curPath);
-    const handleClose = () => setShow(false);
-    const handleShow = () => setShow(true);
+    const [type, setType] = useState('');
+    const [name, setName] = useState('');
+    const [description, setDescripation] = useState('');
+    const [show, setShow] = useState(false);
 
-    const handleChange = useCallback((event) => {
-        setSelecteDir(event.target.value);
-        if (event.target.value === '') {
-            setIsSelecteDir(true);
-        } else {
-            setIsSelecteDir(false)
-        };
-    }, [setSelecteDir, setIsSelecteDir]);
+    const dispatch = useDispatch()
 
+    // HANDLE DIR TYPE
+    const handleType = useCallback((event) => {
+        setType(event.target.value);
+    }, [setType]);
 
-    const handleDirName = useCallback((event) => {
-        setDirName(event.target.value);
-        if (event.target.value === "") {
-            setIsDirName(true);
-        } else {
-            setIsDirName(false);
-        };
-    }, [setDirName, setIsDirName]);
+    // HANDLE DIR OF FILE NAME
+    const handleName = useCallback((event) => {
+        setName(event.target.value);
+    }, [setName]);
 
-    //  Create a new Dir or filesu
+    // CREATE NEW FILE ITEMS 
     const createItem = useCallback(() => {
-        if (dirName === "" || selecteDir === "") {
-            setIsDirName(true);
-            setIsSelecteDir(true);
-        } else {
-            let dirType = selecteDir === "file" ? '1' : '0';
-            let dirname = dirName.charAt(0).toUpperCase() + dirName.slice(1);
-
-            let newObj = {
-                name: dirname,
-                type: dirType,
-                currPath: curPath,
-                description: fileConatin,
-                created_At: new Date().toDateString(),
-                isDelete: false
-            };
-            dispatch(createDir(newObj));
-            localStorage.setItem('lastupdatedate', new Date())
-            setShow(false);
-        }
-    }, [setShow, dispatch, setIsDirName, setIsSelecteDir, selecteDir, dirName]);
+        let newObj = {
+            name: name.charAt(0).toUpperCase() + name.slice(1),
+            type: type === "file" ? '1' : '0',
+            currPath: curPath,
+            description: description,
+            created_At: new Date().toDateString(),
+            isDelete: false
+        };
+        dispatch(createDir(newObj));
+        setShow(false);
+    }, [setShow, dispatch, name, type]);
 
     return (
         <>
-            <Button variant="primary" onClick={handleShow} className="p-2">
+            <Button variant="primary" onClick={() => setShow(true)} className="p-2">
                 add
             </Button>
-            <Modal show={show} onHide={handleClose}>
+            <Modal show={show} onHide={() => setShow(false)}>
                 <Modal.Header closeButton>
                     <Modal.Title>Add New </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <FormControl className="w-100 m-1" size="small">
-                        <InputLabel id="demo-select-small">select File Dir</InputLabel>
+                        <InputLabel id="demo-select-small">select type</InputLabel>
                         <Select
                             labelId="demo-select-small"
                             id="demo-select-small"
-                            value={selecteDir}
+                            value={type}
                             label="select File Dir"
-                            onChange={handleChange}
+                            onChange={handleType}
                         >
                             <MenuItem value='file'>File</MenuItem>
                             <MenuItem value='folder'>Folder</MenuItem>
                         </Select>
-                        {isSelecteDir && <p className=" mx-2 my-0 text-danger">please selecte dir name</p>}
+                        {/* //  {type = '' && <p className=" mx-2 my-0 text-danger">please selecte dir name</p>} */}
 
                     </FormControl>
                     <div className="m-1 w-100">
-                        <input className="form-control " type="text" placeholder={`Enter dir name`} onChange={(e) => handleDirName(e)} />
-                        {isDirName && <p className="mx-2 my-0 text-danger">please enter dir name</p>}
+                        <input className="form-control " type="text" placeholder={`Enter ${type} name`} onChange={(e) => handleName(e)} />
+                        {/* {isDirName && <p className="mx-2 my-0 text-danger">please enter dir name</p>} */}
                     </div>
                     {
 
-                        selecteDir == 'file' &&
+                        type == 'file' &&
                         < div className="m-1 w-100">
-                            <textarea className="form-control " type="text" placeholder={`Enter file contains`} onChange={(e) => setFileConatin(e.target.value)} />
+                            <textarea className="form-control " type="text" placeholder='Enter file contains' onChange={(e) => setDescripation(e.target.value)} />
                         </div>
                     }
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button onClick={handleClose} className='text-white bg-danger'>Close</Button>
+                    <Button onClick={() => setShow(false)} className='text-white bg-danger'>Close</Button>
                     <Button variant="primary" onClick={() => createItem()}>Add</Button>
                 </Modal.Footer>
             </Modal>

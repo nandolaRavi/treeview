@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import Tree from "./Tree";
 import { useDispatch, useSelector } from "react-redux";
-import { setPath, setType, deleteDir, setView, setEditSourePath } from "../redux/reducers/treeViewSlice"
+import { setPath, setType, deleteDir, setEditSourePath } from "../redux/reducers/treeViewSlice"
 import { FaFolderOpen, FaFile } from "react-icons/fa";
 import { FaTrashAlt } from "react-icons/fa";
 import ContextMenu from "./menu"
@@ -10,57 +10,55 @@ import { FiChevronDown } from "react-icons/fi";
 import EditView from "./EditView";
 import "../css/TreeNode.css"
 
-const TreeNode = ({ node, currEditObject }) => {
-    const serachKeyWord = useSelector((state) => state.treeView.serachKeyWord);
+const TreeNode = ({ node }) => {
+    const searchkeyword = useSelector((state) => state.treeView.serachKeyWord);
     const { children, label, path, type, isDelete } = node;
     const [showChildren, setShowChildren] = useState(true);
     const icons = [<FaFolderOpen />, <FaFile />];
 
     const dispatch = useDispatch();
 
-    const handleClick = useCallback(() => {
+    const handleChild = useCallback((type, path) => {
         setShowChildren(!showChildren);
         dispatch(setType({ type: type }));
         dispatch(setPath({ path: path }));
-    }, [setShowChildren, dispatch]);
+    }, [setShowChildren, dispatch, path, type]);
 
-    const viewSelecteFile = useDispatch((path) => {
+    const handleEditSource = useDispatch((path) => {
         dispatch(setEditSourePath({ path: path }))
-    }, [dispatch])
+    }, [dispatch, path])
 
-    const deleteItem = useCallback((curPath) => {
-        dispatch(setView(false))
-        dispatch(deleteDir({ path: curPath }));
-        dispatch(setPath({ path: node.parentpath }));
-    }, [dispatch])
+    const hanldeDeleteItem = useCallback((path) => {
+        dispatch(deleteDir({ path: path }));
+    }, [dispatch, path])
 
-    const handlePath = useCallback((path) => {
+    const handleCurrPath = useCallback((path) => {
         dispatch(setPath({ path: path }));
-    }, [dispatch]);
-    
+    }, [dispatch, path]);
+
     return (
         <>
-            <div style={{ marginBottom: "5px" }} onClick={() => { handlePath(path) }}>
+            <div style={{ marginBottom: "5px" }} onClick={() => { handleCurrPath(path) }}>
                 {
                     isDelete == false &&
                     <div className="d-flex d-flex align-items-center m-2">
                         <div className="d-flex mx-3">
                             <div className="fs-2 text-warning">
-                                {type == '0' && <FiChevronDown onClick={() => handleClick()} className="text-black fs-4" />} {icons[type]}
+                                {type == '0' && <FiChevronDown onClick={() => handleChild(type, path)} className="text-black fs-4" />} {icons[type]}
                             </div>
                             <div className="p-2 mt-2 d-flex align-items-center">
                                 <div>
-                                    <h5 className={label.toLowerCase().includes(serachKeyWord) > 0 && serachKeyWord !== '' ? 'highlights' : ''}>{label}</h5>
+                                    <h5 className={label.toLowerCase().includes(searchkeyword) > 0 && searchkeyword !== '' ? 'highlights' : ''}>{label}</h5>
                                 </div>
                                 <div className="main-container d-flex">
                                     <div className="mx-2">
                                         {path !== 'Home' && <Button variant="danger">
-                                            <FaTrashAlt onClick={() => deleteItem(path)} className="delete-item-button text-white" /></Button>
+                                            <FaTrashAlt onClick={() => hanldeDeleteItem(path)} className="delete-item-button text-white" /></Button>
                                         }
                                     </div>
-                                    <div onClick={() => viewSelecteFile(path)}>
+                                    <div onClick={() => handleEditSource(path)}>
                                         {path !== 'Home' && <Button variant="info">
-                                            <EditView className="view-item-button bg-info" currEditObject={currEditObject} /></Button>
+                                            <EditView className="view-item-button bg-info" /></Button>
                                         }
                                     </  div>
                                     <div className="mx-2">
@@ -79,7 +77,7 @@ const TreeNode = ({ node, currEditObject }) => {
                     {
                         children &&
                         <div>
-                            {showChildren && <Tree data={children} />}
+                            {showChildren && <Tree treeData={children} />}
                         </div>}
                 </ul>
             }

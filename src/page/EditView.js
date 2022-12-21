@@ -5,45 +5,39 @@ import Offcanvas from 'react-bootstrap/Offcanvas';
 import { useSelector, useDispatch } from 'react-redux';
 import { FaEye } from "react-icons/fa";
 
-export const EditView = ({ path }) => {
-    const [isDirName, setIsDirName] = useState(false);
-    const [show, setShow] = useState(false);
-    const handleClose = () => setShow(false);
-    const handleShow = () => setShow(true);
-    const [dirName, setDirName] = useState("");
-    const [fileConatin, setFileConatin] = useState('')
-    const [isEdit, setIsEdit] = useState(false)
+export const EditView = () => {
     const selectedDirData = useSelector((state) => state.treeView.viewCurrDir);
     const curPath = useSelector((state) => state.treeView.curPath);
+    const [name, setName] = useState('');
+    const [descripation, setDescripation] = useState('')
+    const [show, setShow] = useState(false);
+    const [isEdit, setIsEdit] = useState(false);
+    const dishpatch = useDispatch();
 
-    const dishpatch = useDispatch()
-
-    const handleDirName = useCallback((event) => {
+    const handleName = useCallback((event) => {
+        setName(event.target.value);
         setIsEdit(true)
-        setDirName(event.target.value);
-    }, [setIsEdit, setDirName]);
-
-    const createItem = useCallback(() => {
-        let dirname = dirName.charAt(0).toUpperCase() + dirName.slice(1);
-        let newObj = {
-            name: dirname == '' ? selectedDirData.label : dirname,
-            currPath: curPath,
-            description: fileConatin === '' ? selectedDirData.description : fileConatin
-        };
-        dishpatch((editDir(newObj)))
-        //localStorage.setItem('newItem', JSON.stringify(newObj));
-        //localStorage.setItem('lastupdatedate', new Date())
-    }, [dirName, selectedDirData, dishpatch, curPath, fileConatin]);
+    }, [setIsEdit, setName]);
 
     const handleDescription = useCallback((e) => {
         setIsEdit(true);
-        setFileConatin(e.target.value);
-    }, [setIsEdit, setFileConatin])
+        setDescripation(e.target.value);
+    }, [setIsEdit, setDescripation]);
+
+    const editFileItem = useCallback(() => {
+        let dirname = name.charAt(0).toUpperCase() + name.slice(1);
+        let editObj = {
+            name: dirname == '' ? selectedDirData.label : dirname,
+            currPath: curPath,
+            description: descripation === '' ? selectedDirData.description : descripation
+        };
+        dishpatch((editDir(editObj)));
+    }, [name, selectedDirData, dishpatch, curPath, descripation]);
 
     return (
         <>
-            <FaEye onClick={handleShow} className='text-white fs-4' />
-            <Offcanvas show={show} onHide={handleClose} backdrop="static" placement={'end'}>
+            <FaEye onClick={() => setShow(true)} className='text-white fs-4' />
+            <Offcanvas show={show} onHide={() => setShow(false)} backdrop="static" placement={'end'}>
                 <Offcanvas.Header closeButton>
                     <Offcanvas.Title>Edit Info</Offcanvas.Title>
                 </Offcanvas.Header>
@@ -56,11 +50,10 @@ export const EditView = ({ path }) => {
                             <div className=' d-flex align-items-center justify-content-end'><b >Updated_at</b>: {selectedDirData.updated_At}</div>
                             <div className="m-1 w-100">
                                 <h6 className='mx-1'>Dir name</h6>
-                                <input className="form-control p-3" defaultValue={selectedDirData.label} type="text" placeholder={`Enter dir name`} onChange={(e) => handleDirName(e)} />
-                                {isDirName && <p className="mx-2 my-0 text-danger">please enter dir name</p>}
+                                <input className="form-control p-3" defaultValue={selectedDirData.label} type="text" placeholder={`Enter dir name`} onChange={(e) => handleName(e)} />
                             </div>
                             {
-                                selectedDirData.type == '1' &&
+                                selectedDirData.type === '1' &&
                                 <div className="m-1 w-100">
                                     <h6 className='mx-1'>Description</h6>
                                     <textarea className="form-control" defaultValue={selectedDirData.description} type="text" placeholder={`Enter file description`} onChange={(e) => handleDescription(e)} />
@@ -70,7 +63,7 @@ export const EditView = ({ path }) => {
                         {
                             isEdit &&
                             <div className='card-footer d-flex align-items-center justify-content-end'>
-                                <Button variant="primary" onClick={() => createItem()}>Save</Button>
+                                <Button variant="primary" onClick={() => editFileItem()}>Save</Button>
                             </div>
                         }
                     </div>
