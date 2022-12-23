@@ -1,10 +1,9 @@
-import { useSelector } from 'react-redux';
 import './App.css';
-import Home from "./page/Home"
+import AppRoute from './Route';
 function App() {
   return (
     <>
-      <Home />
+      <AppRoute />
     </>
   );
 }

@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { Button, Modal } from "react-bootstrap";
 import { useDispatch } from "react-redux";
-import { mergeDir, replaseDir } from "../redux/reducers/treeViewSlice";
+import { mergeDir, replaseDir } from "../redux/reducers/TreeViewSlice";
 const AlertModal = (props) => {
     const dispatch = useDispatch();
 

@@ -6,7 +6,7 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import { useSelector, useDispatch } from 'react-redux';
-import { createDir } from "../redux/reducers/treeViewSlice";
+import { createDir } from "../redux/reducers/TreeViewSlice";
 
 export const AddModal = () => {
     const curPath = useSelector((state) => state.treeView.curPath);

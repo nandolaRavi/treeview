@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { FaFile, FaFolderOpen, FaTrashRestore } from "react-icons/fa";
 import { useDispatch } from "react-redux";
-import { restoreDir, setPath, setType } from "../redux/reducers/treeViewSlice";
+import { restoreDir, setPath, setType } from "../redux/reducers/TreeViewSlice";
 
 const Recybin = ({ trashData }) => {
   const icons = [<FaFolderOpen />, <FaFile />];
@@ -19,7 +19,7 @@ const Recybin = ({ trashData }) => {
   return (
     <div>
       {trashData.map((node, index) => (
-        <>
+        <div key={index}>
           <div onClick={() => handleClick(node.path, node.type)} style={{ marginBottom: "10px" }}>
             <div className="d-flex d-flex align-items-center m-2">
               <div className="fs-2 text-warning">
@@ -34,7 +34,7 @@ const Recybin = ({ trashData }) => {
           <div style={{ paddingLeft: "10px" }}>
             <Recybin trashData={node.children} />
           </div>
-        </>
+        </div>
       ))}
     </div>
   )

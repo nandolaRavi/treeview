@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import Button from 'react-bootstrap/Button';
-import { editDir } from "../redux/reducers/treeViewSlice"
+import { editDir } from "../redux/reducers/TreeViewSlice"
 import Offcanvas from 'react-bootstrap/Offcanvas';
 import { useSelector, useDispatch } from 'react-redux';
 import { FaEye } from "react-icons/fa";

@@ -1,10 +1,10 @@
 import { useCallback, useState } from "react";
 import Tree from "./Tree";
 import { useDispatch, useSelector } from "react-redux";
-import { setPath, setType, deleteDir, setEditSourePath } from "../redux/reducers/treeViewSlice"
+import { setPath, setType, deleteDir, setEditSourePath } from "../redux/reducers/TreeViewSlice"
 import { FaFolderOpen, FaFile } from "react-icons/fa";
 import { FaTrashAlt } from "react-icons/fa";
-import ContextMenu from "./menu"
+import ContextMenu from "./Menu"
 import { Button } from "react-bootstrap";
 import { FiChevronDown } from "react-icons/fi";
 import EditView from "./EditView";
@@ -26,11 +26,11 @@ const TreeNode = ({ node }) => {
 
     const handleEditSource = useDispatch((path) => {
         dispatch(setEditSourePath({ path: path }))
-    }, [dispatch, path])
+    }, [dispatch, path]);
 
     const hanldeDeleteItem = useCallback((path) => {
         dispatch(deleteDir({ path: path }));
-    }, [dispatch, path])
+    }, [dispatch, path]);
 
     const handleCurrPath = useCallback((path) => {
         dispatch(setPath({ path: path }));

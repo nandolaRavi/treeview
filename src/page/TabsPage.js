@@ -1,7 +1,7 @@
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 import React, { useState } from 'react';
-import { filterDeleletdItem } from '../redux/reducers/treeViewSlice';
+import { filterDeleletdItem } from '../redux/reducers/TreeViewSlice';
 import Tree from './Tree';
 import Recybin from './Recybin';
 

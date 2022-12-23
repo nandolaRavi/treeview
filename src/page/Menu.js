@@ -3,7 +3,7 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { FaEllipsisV } from "react-icons/fa";
 import { useDispatch, useSelector } from 'react-redux';
-import { pasteDir, setCopySourcePath } from '../redux/reducers/treeViewSlice';
+import { pasteDir, setCopySourcePath } from '../redux/reducers/TreeViewSlice';
 
 
 const ContextMenu = ({ path }) => {
