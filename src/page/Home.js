@@ -5,8 +5,8 @@ import { setSearchText, mergeDir, replaseDir } from '../redux/reducers/TreeViewS
 import { useDispatch } from 'react-redux';
 import TabsPage from './TabsPage.js';
 import React from 'react';
-import { Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+
 const Home = () => {
     const dispatch = useDispatch();
     const { files, isConflict, curPath } = useSelector((state) => state.treeView)
@@ -14,23 +14,13 @@ const Home = () => {
 
     useEffect(() => {
         setTreeData(files);
-    }, [files])
-
-    const searchIitem = useCallback((arr, query) => {
-        return query ? arr.reduce((acc, item) => {
-            console.log("acc", acc)
-            if (item.children.length === 0) return;
-            const filtered = searchIitem(item.children, query);
-            if (filtered.length) return [...acc, { ...item, children: filtered }];
-            const { children, ...itemWithoutChildren } = item;
-            return item.label?.toLowerCase().includes(query.toLowerCase()) ? [...acc, itemWithoutChildren] : acc
-        }, []) : arr;
     }, [files]);
 
+   
+
     const handleSearch = useCallback((text) => {
-        setTreeData(searchIitem(files, text));
         dispatch(setSearchText({ text: text }))
-    }, [setTreeData, dispatch,])
+    }, [dispatch,])
 
     const handleMerge = useCallback(() => {
         dispatch(mergeDir());

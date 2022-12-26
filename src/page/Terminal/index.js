@@ -12,10 +12,9 @@ window.myterm = myTerminal;
 
 myTerminal.addCommand(createCommand("set-prompt", 1, (args, terminal) => {
     terminal.setPrompt(args[0]);
-    // terminal.printLine("Hello "+args[0]);
-}))
+}));
 
-function registerTerminalCommands(_curState, dispatch) {
+const registerTerminalCommands = (_curState, dispatch) => {
     function cd(args, terminal) {
         let fileObj = findDirObj(_curState.curPath, _curState.files);
         let targetDir = null;
@@ -56,17 +55,12 @@ function registerTerminalCommands(_curState, dispatch) {
 
     function mkdir(args, terminal) {
         let fileObj = findDirObj(_curState.curPath, _curState.files);
-
         let targetPath = fileObj.path + "/" + args[0];
-
         let targetDir = findDirObj(targetPath, fileObj.children);
         if (targetDir) {
             terminal.printLine("mkdir:" + args[0] + " already exist");
-            return
         }
-        dispatch(createDir({
-            name: args[0],
-        }));
+        dispatch(createDir({ name: args[0] }));
     }
 
     function touch(args, terminal) {
@@ -75,11 +69,9 @@ function registerTerminalCommands(_curState, dispatch) {
         let targetDir = findDirObj(targetPath, fileObj.children);
         if (targetDir) {
             terminal.printLine("touch:" + args[0] + " already exist");
-            return
+            return;
         }
-        dispatch(createFile({
-            name: args[0],
-        }));
+        dispatch(createFile({ name: args[0] }));
     }
 
     function rm(args, terminal) {
@@ -94,9 +86,7 @@ function registerTerminalCommands(_curState, dispatch) {
                 return;
             }
         }
-        dispatch(deleteDir({
-            path: targetDir.path
-        }));
+        dispatch(deleteDir({ path: targetDir.path }));
     }
 
     function pwd(args, terminal) {
@@ -188,7 +178,7 @@ const Terminal = () => {
                 </div>
             }
         </div>
-      
+
         <div style={{ "background": "#141619", "color": "white", "fontWeight": "bold", "padding": "10px" }} >
             <span style={{ color: 'lightgreen' }}>
                 {myTerminal.getPrompt()}

@@ -5,7 +5,9 @@ export function createCommand(cmdName, numberOfargs, fn) {
         numberOfargs: numberOfargs,
         process: fn
     }
-}
+};
+
+
 //this will create a new terminal
 export default function createTerminal() {
     return {
@@ -62,27 +64,28 @@ export default function createTerminal() {
                 console.error("invalid input given");
                 return;
             };
+
             let userCommand = inputData[0];
             this.printLine(this.getPrompt() + " " + this.userInput);
             if (!this.isValidCommand(userCommand)) {
                 this.printLine(userCommand + " : " + " invalid command");
                 return;
-            }
+            };
+
             let cmd = this.commands.find(t => t.name === userCommand);
             if (cmd.numberOfargs > inputData.length - 1) {
                 this.printLine(userCommand + " : " + " Too few argument required for " + userCommand);
                 return;
-            }
-
+            };
             if (cmd.numberOfargs < inputData.length - 1) {
                 this.printLine(userCommand + " : " + " Too many argument provided ");
                 return;
-            }
+            };
+
             cmd.process(inputData.splice(1, inputData.length), this);
             this.history.push(this.userInput)
         },
         processUserInput: function () {
-            console.log("user input", this.userInput);
             let inputData = this.userInput.trim().split(" ");
             let operators = inputData.filter((item) => { return item === '&&' || item === '||' });
             if (operators.length === 0) return this.process(this.userInput);

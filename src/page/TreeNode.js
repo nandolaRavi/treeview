@@ -16,6 +16,7 @@ const TreeNode = ({ node }) => {
     const [showChildren, setShowChildren] = useState(true);
     const icons = [<FaFolderOpen />, <FaFile />];
     const dispatch = useDispatch();
+
     const handleChild = useCallback((type, path) => {
         setShowChildren(!showChildren);
         dispatch(setType({ type: type }));

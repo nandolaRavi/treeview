@@ -138,10 +138,6 @@ const deleteFileItem = (path, items = []) => {
     }
 };
 
-const findDirChildrenLable = (path, items = []) => {
-
-}
-
 const initialState = {
     curPath: 'Home',
     currTab: 'home',
