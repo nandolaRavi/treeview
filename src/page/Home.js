@@ -1,7 +1,7 @@
 import { useSelector } from 'react-redux';
 import { AddModal } from './AddModal';
 import { useCallback, useEffect, useState } from 'react';
-import { setSearchText, mergeDir, replaseDir } from '../redux/reducers/TreeViewSlice';
+import { setSearchText, mergeDir, replaseDir, setPath } from '../redux/reducers/TreeViewSlice';
 import { useDispatch } from 'react-redux';
 import TabsPage from './TabsPage.js';
 import React from 'react';
@@ -15,8 +15,6 @@ const Home = () => {
     useEffect(() => {
         setTreeData(files);
     }, [files]);
-
-   
 
     const handleSearch = useCallback((text) => {
         dispatch(setSearchText({ text: text }))
