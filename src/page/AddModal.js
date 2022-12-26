@@ -14,7 +14,6 @@ export const AddModal = () => {
     const [name, setName] = useState('');
     const [description, setDescripation] = useState('');
     const [show, setShow] = useState(false);
-
     const dispatch = useDispatch()
 
     // HANDLE DIR TYPE

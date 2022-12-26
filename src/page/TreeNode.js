@@ -23,10 +23,6 @@ const TreeNode = ({ node }) => {
         dispatch(setPath({ path: path }));
     }, [setShowChildren, dispatch, path, type]);
 
-    const handleEditSource = useDispatch((path) => {
-        dispatch(setEditSourePath({ path: path }))
-    }, [dispatch, path]);
-
     const hanldeDeleteItem = useCallback((path) => {
         dispatch(deleteDir({ path: path }));
     }, [dispatch, path]);
@@ -55,11 +51,9 @@ const TreeNode = ({ node }) => {
                                             <FaTrashAlt onClick={() => hanldeDeleteItem(path)} className="delete-item-button text-white" /></Button>
                                         }
                                     </div>
-                                    <div onClick={() => handleEditSource(path)}>
-                                        {path !== 'Home' && <Button variant="info">
-                                            <EditView className="view-item-button bg-info" /></Button>
-                                        }
-                                    </  div>
+                                    {path !== 'Home' && <Button variant="info">
+                                        <EditView className="view-item-button bg-info" /></Button>
+                                    }
                                     <div className="mx-2">
                                         <Button><ContextMenu currObj={node} path={path} /></Button>
                                     </div>

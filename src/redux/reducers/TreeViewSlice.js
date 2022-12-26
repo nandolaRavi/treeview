@@ -162,7 +162,7 @@ const initialState = {
             type: "0",
             path: "Home",
             isDelete: false,
-            parentpath: null,
+            parentpath: 'Home',
             children: [
                 createFileItem("Home", "A", "0", ""),
                 createFileItem("Home", "B", "0", ""),
@@ -214,17 +214,20 @@ const treeViewSlice = createSlice({
             deleteFileItem(action.payload.path, state.files);
         },
         restoreDir: (state, action) => {
-            debugger
             resstoreFileItem(action.payload.path, state.files);
         },
         editDir: (state, action) => {
-            // updateData = action.payload;
-            // selectedDirEdit(action.payload.currPath, state.files);
+            let obj = findDirObj(state.curPath, state.files);
+            if (obj) {
+                obj.label = action.payload.name;
+                state.curPath = obj.parentpath + '/' + obj.label
+            };
         },
         setEditSourePath: (state, action) => {
             //    //    let target = selectedViewDir(action.payload.path, state.files);
             //     state.viewCurrDir = target;
         },
+
         setSearchText: (state, action) => {
             state.serachKeyWord = action.payload.text;
         },

@@ -1,18 +1,19 @@
 import { useCallback, useState } from 'react';
 import Button from 'react-bootstrap/Button';
-import { editDir } from "../redux/reducers/TreeViewSlice"
+import { editDir, findDirObj } from "../redux/reducers/TreeViewSlice"
 import Offcanvas from 'react-bootstrap/Offcanvas';
 import { useSelector, useDispatch } from 'react-redux';
 import { FaEye } from "react-icons/fa";
 
 export const EditView = () => {
-    const selectedDirData = useSelector((state) => state.treeView.viewCurrDir);
-    const curPath = useSelector((state) => state.treeView.curPath);
+    const { files, curPath } = useSelector((state) => state.treeView);
     const [name, setName] = useState('');
     const [descripation, setDescripation] = useState('')
     const [show, setShow] = useState(false);
     const [isEdit, setIsEdit] = useState(false);
     const dishpatch = useDispatch();
+    const selectedDirData = findDirObj(curPath, files);
+    console.log(selectedDirData);
 
     const handleName = useCallback((event) => {
         setName(event.target.value);
@@ -24,15 +25,9 @@ export const EditView = () => {
         setDescripation(e.target.value);
     }, [setIsEdit, setDescripation]);
 
-    const editFileItem = useCallback(() => {
-        let dirname = name.charAt(0).toUpperCase() + name.slice(1);
-        let editObj = {
-            name: dirname == '' ? selectedDirData.label : dirname,
-            currPath: curPath,
-            description: descripation === '' ? selectedDirData.description : descripation
-        };
-        dishpatch((editDir(editObj)));
-    }, [name, selectedDirData, dishpatch, curPath, descripation]);
+    const editFileItem = useCallback((value) => {
+        dishpatch((editDir({ name: value })));
+    }, [dishpatch, name]);
 
     return (
         <>
@@ -63,7 +58,7 @@ export const EditView = () => {
                         {
                             isEdit &&
                             <div className='card-footer d-flex align-items-center justify-content-end'>
-                                <Button variant="primary" onClick={() => editFileItem()}>Save</Button>
+                                <Button variant="primary" onClick={() => editFileItem(name)}>Save</Button>
                             </div>
                         }
                     </div>
