@@ -1,61 +1,122 @@
-import React, { useCallback } from "react";
-import { Button } from "react-bootstrap";
-import { GrClose } from "react-icons/gr";
-import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
-import './Terminal.css';
-import { useDispatch } from "react-redux";
-import { setInputMessage } from "../../redux/reducers/TreeViewSlice";
-const Terminal = () => {
-    const { curPath, terminalMessge } = useSelector((state) => state.treeView);
-    const dispatch = useDispatch();
-    const handleInput = useCallback((e) => {
-        if (e.target.value === "") return;
-        if (e.key !== "Enter") return;
-        dispatch(setInputMessage({ value: e.target.value, path: curPath, isValidInput: false }));
-        e.target.value = ''
-    }, [dispatch, curPath]);
 
-    return (
-        <div className="main-body m-2 overflow-auto">
-            <div className="header bg-black p-2">
-                <div className="d-flex align-items-center justify-content-end">
-                    <Link to='/'><Button className="bg-danger">
-                        <GrClose className="fs-4 text-white" />
-                    </Button>
-                    </Link>
-                </div>
-            </div>
-
-            <div className="mx-2 my-2">
-                {terminalMessge.length > 0 && terminalMessge.map((item, index) => (
-                    <div key={index}>
-                        <div className="d-flex align-items-center">
-                            <div>
-                                <b><h6 className="text-success">{item.path}:~</h6></b>
-                            </div>
-                            <div className="mx-2">
-                                <h6 className="text-white">{item.value.charAt(0).toUpperCase() + item.value.slice(1)}</h6>
-                            </div>
-                        </div>
-                        {!item.isValidInput && <div className="mx-1">
-                            <h6 className="text-white">{item.message}</h6>
-                        </div>}
-                        <hr className="text-white" />
-                    </div>
-                ))};
-            </div>
-
-            <div className="d-flex align-items-center">
-                <div className="m-2">
-                    <b><h6 className="text-white">{curPath}:~</h6></b>
-                </div>
-                <div>
-                    <input onKeyPress={(e) => handleInput(e)} type='text' />
-                </div>
-            </div>
-        </div>
-    )
+export function createCommand(cmdName, numberOfargs, fn) {
+    return {
+        name: cmdName,
+        numberOfargs: numberOfargs,
+        process: fn
+    }
 }
+//this will create a new terminal
+export default function createTerminal() {
+    return {
+        commands: [],
+        history: [],
+        prompt1: "$",
+        prompt2: "/homedfsdfsdf",
+        outputLines: [],
+        dirArry: [],
+        subscribe: function () {
+            console.log("this is old subscribe");
+        },
+        setSubscribe: function (cn) {
+            this.subscribe = cn;
+        },
+        printLine: function (line) {
+            this.outputLines.push(line);
+            this.subscribe();
+        },
+        userInput: "",
+        addCommand: function (cmd) {
+            // console.log("its called")
+            if (!cmd) {
+                alert("Invalid value");
+                return;
+            };
+            if (this.isValidCommand(cmd.name)) {
+                let index = this.commands.findIndex(t => t.name === cmd.name)
+                if (index >= 0) {
+                    this.commands[index] = cmd;
+                };
+                return;
+            };
+            this.commands.push(cmd);
+        },
+        setPrompt: function (decor) {
+            this.prompt2 = decor;
+        },
+        getPrompt: function () {
+            return this.prompt2 + this.prompt1;
+        },
+        setUserInput: function (input) {
+            this.userInput = input;
+        },
+        isValidCommand: function (cmdName) {
+            return this.commands.map(t => t.name).includes(cmdName);
+        },
 
-export default Terminal
+        process: function (exCommand = '') {
+            let inputData = [];
+            let cmdStr = exCommand !== '' ? exCommand : this.userInput;
+            inputData = cmdStr.trim().split(" ");
+            if (inputData.length == 0) {
+                console.error("invalid input given");
+                return;
+            };
+            let userCommand = inputData[0];
+            this.printLine(this.getPrompt() + " " + this.userInput);
+            if (!this.isValidCommand(userCommand)) {
+                this.printLine(userCommand + " : " + " invalid command");
+                return;
+            }
+            let cmd = this.commands.find(t => t.name === userCommand);
+            if (cmd.numberOfargs > inputData.length - 1) {
+                this.printLine(userCommand + " : " + " Too few argument required for " + userCommand);
+                return;
+            }
+
+            if (cmd.numberOfargs < inputData.length - 1) {
+                this.printLine(userCommand + " : " + " Too many argument provided ");
+                return;
+            }
+            cmd.process(inputData.splice(1, inputData.length), this);
+            this.history.push(this.userInput)
+        },
+        processUserInput: function () {
+            console.log("user input", this.userInput);
+            let inputData = this.userInput.trim().split(" ");
+            let operators = inputData.filter((item) => { return item === '&&' || item === '||' });
+            if (operators.length === 0) return this.process(this.userInput);
+
+            //when there is operators && and || in user input;
+            let exeMode = 'SEQ';
+            let spitOprt = '';
+            spitOprt = operators[0];
+            if (operators[0] === '||') {
+                exeMode = 'PARA'
+            }
+
+            //now we have to spit user input by spitort
+            let oprtIndex = this.userInput.indexOf(spitOprt);
+            let cmd1 = this.userInput.slice(0, oprtIndex).trim();
+            let cmd2 = this.userInput.slice(oprtIndex + 2, this.userInput.length).trim();
+            console.log("cmd1", cmd1, "cmd2", cmd2);
+            if (exeMode === 'SEQ') {
+                this.process(cmd1)
+                setTimeout(() => {
+                    this.userInput = cmd2;
+                    this.processUserInput();
+                }, 1)
+                return;
+            }
+            setTimeout(() => {
+                this.process(cmd1);
+            }, 1)
+            setTimeout(() => {
+                this.userInput = cmd2;
+                this.processUserInput();
+            }, 1)
+
+
+        }
+    };
+};

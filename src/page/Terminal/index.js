@@ -1,8 +1,8 @@
 import _, { create } from "lodash";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { createDir, createFile, cutDir, deleteDir, findDirObj, setPath } from "../redux/reducers/TreeViewSlice";
-import createTerminal, { createCommand } from "./terminal";
+import { createDir, createFile, deleteDir, findDirObj, setPath } from "../../redux/reducers/TreeViewSlice";
+import createTerminal, { createCommand } from "./Terminal";
 
 let myTerminal = createTerminal();
 
