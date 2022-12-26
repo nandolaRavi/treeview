@@ -69,9 +69,7 @@ function registerTerminalCommands(_curState, dispatch) {
 
     function touch(args, terminal) {
         let fileObj = findDirObj(_curState.curPath, _curState.files);
-
         let targetPath = fileObj.path + "/" + args[0];
-
         let targetDir = findDirObj(targetPath, fileObj.children);
         if (targetDir) {
             terminal.printLine("touch:" + args[0] + " already exist");
@@ -84,11 +82,8 @@ function registerTerminalCommands(_curState, dispatch) {
 
     function rm(args, terminal) {
         let fileObj = findDirObj(_curState.curPath, _curState.files);
-
         let targetPath = fileObj.path + "/" + args[0];
-
         let targetDir = findDirObj(targetPath, fileObj.children);
-
         if (!targetDir) {
             targetPath = args[0];
             targetDir = findDirObj(targetPath, _curState.files);
@@ -109,8 +104,8 @@ function registerTerminalCommands(_curState, dispatch) {
         return;
     }
 
-    function clearFn(args,terminal){
-        terminal.outputLines=[];
+    function clearFn(args, terminal) {
+        terminal.outputLines = [];
         terminal.subscribe();
     }
 
@@ -121,7 +116,7 @@ function registerTerminalCommands(_curState, dispatch) {
     myTerminal.addCommand(createCommand("pwd", 0, pwd));
     myTerminal.addCommand(createCommand("rm", 1, rm));
     myTerminal.addCommand(createCommand('history', 0, history))
-    myTerminal.addCommand(createCommand('cls',0,clearFn));
+    myTerminal.addCommand(createCommand('cls', 0, clearFn));
 }
 
 
@@ -129,26 +124,24 @@ function registerTerminalCommands(_curState, dispatch) {
 const Terminal = () => {
     const curState = useSelector(state => ({ ...state.treeView }));
     const [update, setUpdate] = useState("");
+    const dispatch = useDispatch();
+    const inputElement = useRef(null);
 
     useEffect(() => {
         myTerminal.setSubscribe(() => {
-            setUpdate(Math.random() + "");
+            setUpdate(Math.random().toString());
         })
-    }, [setUpdate])
+    }, [setUpdate]);
 
     useEffect(() => {
         myTerminal.setPrompt(curState.curPath);
         setUpdate(v => !v)
     }, [curState.curPath, setUpdate]);
 
-    const dispatch = useDispatch();
+
     useEffect(() => {
         registerTerminalCommands(curState, dispatch);
-        console.log(myTerminal.userInput)
-    }, [dispatch, curState])
-
-    const inputElement = useRef(null);
-    useOutsideAlerter(inputElement);
+    }, [dispatch, curState]);
 
     function useOutsideAlerter(ref) {
         useEffect(() => {
@@ -160,7 +153,8 @@ const Terminal = () => {
             }
             document.addEventListener("click", handleClickOutside)
         }, [ref]);
-    }
+    };
+    useOutsideAlerter(inputElement);
 
     return <>
         <div>
@@ -180,7 +174,7 @@ const Terminal = () => {
                         myTerminal.history.map((t, index) => (
                             <>
                                 <div key={index} className="d-flex">
-                                    <div className="mx-1">{index + 1}.</div>
+                                    <div className="mx-1">{index + 1}<b>.</b></div>
                                     <div>
                                         {t}
                                     </div>
@@ -204,7 +198,7 @@ const Terminal = () => {
                     if (e.key !== 'Enter') return;
                     myTerminal.setUserInput(e.target.value);
                     myTerminal.processUserInput();
-                    e.target.value='';
+                    e.target.value = '';
                 }} /></div>
     </>
 }
