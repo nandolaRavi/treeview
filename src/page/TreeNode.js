@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import Tree from "./Tree";
 import { useDispatch, useSelector } from "react-redux";
-import { setPath, setType, deleteDir, setEditSourePath } from "../redux/reducers/TreeViewSlice"
+import { setPath, setType, deleteDir, setEditSourePath, findDirObj } from "../redux/reducers/TreeViewSlice"
 import { FaFolderOpen, FaFile } from "react-icons/fa";
 import { FaTrashAlt } from "react-icons/fa";
 import ContextMenu from "./Menu"
@@ -15,9 +15,7 @@ const TreeNode = ({ node }) => {
     const { children, label, path, type, isDelete } = node;
     const [showChildren, setShowChildren] = useState(true);
     const icons = [<FaFolderOpen />, <FaFile />];
-
     const dispatch = useDispatch();
-
     const handleChild = useCallback((type, path) => {
         setShowChildren(!showChildren);
         dispatch(setType({ type: type }));

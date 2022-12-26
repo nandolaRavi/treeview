@@ -1,6 +1,8 @@
 import _, { create } from "lodash";
 import { useEffect, useRef, useState } from "react";
+import { Button } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import { createDir, createFile, deleteDir, findDirObj, setPath } from "../../redux/reducers/TreeViewSlice";
 import createTerminal, { createCommand } from "./Terminal";
 
@@ -157,6 +159,7 @@ const Terminal = () => {
     useOutsideAlerter(inputElement);
 
     return <>
+        <Link to={'/'}><Button variant="secondary">Back</Button></Link>
         <div>
             <div style={{ "background": "lightgray", "border": "1px solid gray", "borderRadius": "4px", "marginTop": "5px", "padding": "10px", "fontWeight": "bold" }}>
                 {curState.curPath}
@@ -185,7 +188,7 @@ const Terminal = () => {
                 </div>
             }
         </div>
-
+      
         <div style={{ "background": "#141619", "color": "white", "fontWeight": "bold", "padding": "10px" }} >
             <span style={{ color: 'lightgreen' }}>
                 {myTerminal.getPrompt()}

@@ -6,7 +6,7 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import { useSelector, useDispatch } from 'react-redux';
-import { createDir } from "../redux/reducers/TreeViewSlice";
+import { createDir, createFile } from "../redux/reducers/TreeViewSlice";
 
 export const AddModal = () => {
     const curPath = useSelector((state) => state.treeView.curPath);
@@ -29,15 +29,13 @@ export const AddModal = () => {
 
     // CREATE NEW FILE ITEMS 
     const createItem = useCallback(() => {
-        let newObj = {
-            name: name.charAt(0).toUpperCase() + name.slice(1),
-            type: type === "file" ? '1' : '0',
-            currPath: curPath,
-            description: description,
-            created_At: new Date().toDateString(),
-            isDelete: false
-        };
-        dispatch(createDir(newObj));
+
+        if (type === 'file') {
+            dispatch(createFile({ name: name }));
+            setShow(false);
+            return;
+        }
+        dispatch(createDir({ name: name }))
         setShow(false);
     }, [setShow, dispatch, name, type]);
 

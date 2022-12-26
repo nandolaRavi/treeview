@@ -7,7 +7,6 @@ import TabsPage from './TabsPage.js';
 import React from 'react';
 import { Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-
 const Home = () => {
     const dispatch = useDispatch();
     const { files, isConflict, curPath } = useSelector((state) => state.treeView)
@@ -20,7 +19,7 @@ const Home = () => {
     const searchIitem = useCallback((arr, query) => {
         return query ? arr.reduce((acc, item) => {
             console.log("acc", acc)
-            if (item.children.length <= 0) return;
+            if (item.children.length === 0) return;
             const filtered = searchIitem(item.children, query);
             if (filtered.length) return [...acc, { ...item, children: filtered }];
             const { children, ...itemWithoutChildren } = item;

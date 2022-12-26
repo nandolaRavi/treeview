@@ -5,7 +5,7 @@ import Terminal from "./page/Terminal";
 
 const AppRoute = () => {
     return (
-        <BrowserRouter>
+        <BrowserRouter basename="/treeview">
             <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="terminal" element={<Terminal />} />

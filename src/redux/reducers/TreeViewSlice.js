@@ -181,6 +181,8 @@ const treeViewSlice = createSlice({
     initialState,
     reducers: {
         setPath: (state, action) => {
+            let obj = findDirObj(action.payload.path, state.files);
+            if (obj.type == '1') return;
             state.curPath = action.payload.path;
         },
         setType: (state, action) => {
@@ -191,7 +193,7 @@ const treeViewSlice = createSlice({
             if (!currObj.children.map(t => t.label).includes(action.payload.name)) {
                 let target = findDir(state.curPath, state.files);
                 if (!!Array.isArray(target)) {
-                    target.push(createFileItem(state.curPath, action.payload.name,"1","", new Date()));
+                    target.push(createFileItem(state.curPath, action.payload.name, "1", "", new Date()));
                 } else {
                     alert("facing error to create dir path:" + state.curPath);
                 };
@@ -204,7 +206,7 @@ const treeViewSlice = createSlice({
             if (!currObj.children.map(t => t.label).includes(action.payload.name)) {
                 let target = findDir(state.curPath, state.files);
                 if (!!Array.isArray(target)) {
-                    target.push(createFileItem(state.curPath, action.payload.name,"0","", new Date()));
+                    target.push(createFileItem(state.curPath, action.payload.name, "0", "", new Date()));
                 } else {
                     alert("facing error to create dir path:" + state.curPath);
                 };
@@ -366,6 +368,6 @@ const treeViewSlice = createSlice({
     },
 })
 
-export const { setPath, setCopySourcePath, setInputMessage, createDir, replaseDir,createFile, mergeDir, setType, deleteDir, copyDir, cutDir, pasteDir, setSearchText, editDir, setEditSourePath, restoreDir, } = treeViewSlice.actions;
+export const { setPath, setCopySourcePath, setInputMessage, createDir, replaseDir, createFile, mergeDir, setType, deleteDir, copyDir, cutDir, pasteDir, setSearchText, editDir, setEditSourePath, restoreDir, } = treeViewSlice.actions;
 
 export default treeViewSlice.reducer;
