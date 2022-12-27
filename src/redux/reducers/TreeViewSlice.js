@@ -1,9 +1,9 @@
-import { CreateNewFolder } from '@mui/icons-material';
+import { CreateNewFolder, Satellite, Star } from '@mui/icons-material';
 import { createSlice } from '@reduxjs/toolkit';
+import _, { filter, result } from 'lodash';
 export var copyDirObj = {};
-export var isOPenAlert = false
+export var isOPenAlert = false;
 
-var commandLineArray = ['cd', 'cd..', 'cls'];
 const createFileItem = (path, name, type, description) => {
     return {
         path: path + "/" + name,
@@ -12,6 +12,7 @@ const createFileItem = (path, name, type, description) => {
         create_At: new Date().toDateString(),
         parentpath: path,
         isDelete: false,
+        isCut: false,
         description: description,
         updated_At: null,
         children: []
@@ -138,6 +139,27 @@ const deleteFileItem = (path, items = []) => {
     }
 };
 
+const filterCutObject = (path, items = []) => {
+    for (let i = 0; i < items.length; i++) {
+        let item = items[i];
+        if (item.path === path) {
+            item.isCut = true;
+            if (Array.isArray(item.children) && item.children.length > 0) {
+                let children = item.children;
+                for (let j = 0; j < children.length; j++) {
+                    children[j].isCut = true;
+                    if (children[j].type === '0') {
+                        filterCutObject(children[j].path, children[j].children)
+                    }
+                }
+            }
+        }
+        if (item.type === '0') {
+            filterCutObject(path, item.children)
+        }
+    }
+};
+
 const initialState = {
     curPath: 'Home',
     currTab: 'home',
@@ -146,6 +168,7 @@ const initialState = {
 
     sourcePath: '',//this will have path when you copy something
     destinationPath: '',
+    cutSourePath: '',
 
     terminalMessge: [],
     validInputArr: [],
@@ -171,7 +194,6 @@ const initialState = {
         },
     ],
 };
-
 const treeViewSlice = createSlice({
     name: 'fileSystem',
     initialState,
@@ -223,6 +245,10 @@ const treeViewSlice = createSlice({
                 state.curPath = obj.parentpath + '/' + obj.label
             };
         },
+        cutDir: (state, action) => {
+            let obj = findDirObj(action.curPath, state.files);
+
+        },
         setEditSourePath: (state, action) => {
             //    //    let target = selectedViewDir(action.payload.path, state.files);
             //     state.viewCurrDir = target;
@@ -240,21 +266,35 @@ const treeViewSlice = createSlice({
             let existFileCount = 0;
             state.destinationPath = action.payload.path;
             let sourceFileObject = findDirObj(state.sourcePath, state.files);
+            let sourceCutObj = findDirObj(state.cutSourePath, state.files);
+            let sourceCutObjCopy = JSON.parse(JSON.stringify(sourceCutObj));
             let sourceFileObjectCopy = JSON.parse(JSON.stringify(sourceFileObject));
-
-            if (!sourceFileObjectCopy) {
-                alert("Error : invalid source path");
-                return;
-            }
             let destinationFileObject = findDirObj(state.destinationPath, state.files);
             if (!destinationFileObject) {
                 alert("Error : invalid destination path");
                 return;
-
             }
+            if (state.cutSourePath !== '') {
+                let child = destinationFileObject.children.find((fObj) => {
+                    return fObj.label === sourceCutObjCopy.label;
+                });
+                sourceCutObjCopy.path = sourceCutObjCopy.path + '/' + sourceCutObjCopy.label;
+                destinationFileObject.children.push(sourceCutObjCopy);
+                filterCutObject(state.cutSourePath, state.files);
+                if (child && child.type === '0') {
+                    state.isConflict = true;
+                    return;
+                };
+                return;
+            }
+            if (!sourceFileObjectCopy) {
+                alert("Error : invalid source path");
+                return;
+            }
+
             let destChild = destinationFileObject.children.find((fObj) => {
                 return fObj.label === sourceFileObjectCopy.label;
-            })
+            });
             sourceFileObjectCopy.path = destinationFileObject.path + '/' + sourceFileObjectCopy.label;
 
             if (sourceFileObjectCopy.children.length > 0) {
@@ -271,8 +311,7 @@ const treeViewSlice = createSlice({
                 if (existFileCount > 0) {
                     sourceFileObjectCopy.label = sourceFileObject.label + `(${existFileCount})`;
                 }
-            }
-
+            };
             if (destChild && destChild.type === '0') {
                 state.isConflict = true;
                 return;
@@ -282,39 +321,56 @@ const treeViewSlice = createSlice({
         },
 
         mergeDir: (state) => {
+            let sourceCutObj = findDirObj(state.cutSourePath, state.files);
+            let sourceCutObjCopy = JSON.parse(JSON.stringify(sourceCutObj));
             let sourceFileObject = findDirObj(state.sourcePath, state.files);
             let sourceFileObjectCopy = JSON.parse(JSON.stringify(sourceFileObject));
-            if (!sourceFileObjectCopy) {
-                alert("Error : invalid source path");
-                return;
-            };
-
             let destinationFileObject = findDirObj(state.destinationPath, state.files);
             if (!destinationFileObject) {
                 alert("Error : invalid destination path");
                 return;
             };
 
+            if (state.cutSourePath !== '') {
+                let child = destinationFileObject.children.find((fObj) => {
+                    return fObj.label === sourceCutObjCopy.label;
+                });
+                for (let i = 0; i < sourceCutObjCopy.children.length; i++) {
+                    const element = sourceCutObjCopy.children[i];
+                    if (!child.children.map(t => t.label).includes(element.label)) {
+                        element.path = child.path + '/' + sourceCutObjCopy.children[i].label;
+                        child.children.push(element);
+                    };
+                };
+                filterCutObject(state.cutSourePath, state.files);
+                return;
+            };
+            if (!sourceFileObjectCopy) {
+                alert("Error : invalid source path");
+                return;
+            };
             let destChild = destinationFileObject.children.find((fObj) => {
                 return fObj.label === sourceFileObjectCopy.label;
             });
-
             for (let i = 0; i < sourceFileObjectCopy.children.length; i++) {
                 const element = sourceFileObjectCopy.children[i];
                 if (!destChild.children.map(t => t.label).includes(element.label)) {
                     element.path = destChild.path + '/' + sourceFileObjectCopy.children[i].label;
                     destChild.children.push(element);
+                    return;
                 };
             };
         },
 
         replaseDir: (state) => {
+            let sourceCutObj = findDirObj(state.cutSourePath, state.files);
+            let sourceCutObjCopy = JSON.parse(JSON.stringify(sourceCutObj));
             let destObj = findDirObj(state.destinationPath, state.files);
-
             if (!!destObj) {
                 let srcObj = findDirObj(state.sourcePath, state.files);
                 let sourceFileObjectCopy = JSON.parse(JSON.stringify(srcObj));
                 let conflictObj = destObj.children.find(t => { return t.label == sourceFileObjectCopy.label });
+
                 sourceFileObjectCopy.children.forEach(t => {
                     t.path = conflictObj.path + '/' + t.label;
                 });
@@ -322,51 +378,24 @@ const treeViewSlice = createSlice({
                     const element = sourceFileObjectCopy.children[i];
                     element.path = conflictObj.path + '/' + sourceFileObjectCopy.children[i].label;
                 };
-                conflictObj.children = sourceFileObjectCopy.children
+                conflictObj.children = sourceFileObjectCopy.children;
             }
             alert("Error : invalid  destobj");
             return;
-            ;
         },
-        //this will set the source path from where we want to copy data
+
         setCopySourcePath: (state, action) => {
-            state.sourcePath = action.payload
+            state.sourcePath = action.payload;
+            state.cutSourePath = ''
         },
 
-        setInputMessage: (state, action) => {
-            let cur_commandName = commandLineArray.find(item => { return item === action.payload.value.split(' ')[0] });
-            if (cur_commandName) {
-                state.terminalMessge.push(createMessage(action.payload.path, action.payload.value, 'No such file or directory', false));
-
-            } else {
-                switch (action.payload.value) {
-                    case 'cls': {
-                        state.terminalMessge = [];
-                        return;
-                    }
-                    case 'cd..': {
-                        let filterObj = findDirObj(action.payload.path, state.files);
-                        if (!filterObj) {
-                            state.terminalMessge.push(createMessage(action.payload.path, action.payload.value, "command not found", action.payload.isValidInput));
-                            return;
-                        };
-                        let filterPerentObj = findDirObj(filterObj.parentpath, state.files);
-                        if (!filterPerentObj) {
-                            state.terminalMessge.push(createMessage(action.payload.path, action.payload.value, 'command not found', action.payload.isValidInput));
-                            return;
-                        };
-                        state.curPath = filterPerentObj.path;
-                        state.terminalMessge.push(createMessage(action.payload.path, action.payload.value, 'command not found', true));
-                        return;
-                    };
-                };
-            }
-
-            state.terminalMessge.push(createMessage(action.payload.path, action.payload.value, action.payload.isValidInput));
+        setCutSourePath: (state, action) => {
+            state.cutSourePath = action.payload;
         }
     },
+
 })
 
-export const { setPath, setCopySourcePath, setInputMessage, createDir, replaseDir, createFile, mergeDir, setType, deleteDir, copyDir, cutDir, pasteDir, setSearchText, editDir, setEditSourePath, restoreDir, } = treeViewSlice.actions;
+export const { setPath, setCopySourcePath, setInputMessage, setCutSourePath, createDir, replaseDir, createFile, mergeDir, setType, deleteDir, copyDir, cutDir, pasteDir, setSearchText, editDir, setEditSourePath, restoreDir, } = treeViewSlice.actions;
 
 export default treeViewSlice.reducer;

@@ -12,7 +12,7 @@ import "../css/TreeNode.css"
 
 const TreeNode = ({ node }) => {
     const searchkeyword = useSelector((state) => state.treeView.serachKeyWord);
-    const { children, label, path, type, isDelete } = node;
+    const { children, label, path, type, isDelete,isCut } = node;
     const [showChildren, setShowChildren] = useState(true);
     const icons = [<FaFolderOpen />, <FaFile />];
     const dispatch = useDispatch();
@@ -21,7 +21,7 @@ const TreeNode = ({ node }) => {
         setShowChildren(!showChildren);
         dispatch(setType({ type: type }));
         dispatch(setPath({ path: path }));
-    }, [setShowChildren, dispatch, path, type]);
+    }, [setShowChildren, dispatch, path, type, showChildren]);
 
     const hanldeDeleteItem = useCallback((path) => {
         dispatch(deleteDir({ path: path }));
@@ -35,8 +35,8 @@ const TreeNode = ({ node }) => {
         <>
             <div style={{ marginBottom: "5px" }} onClick={() => { handleCurrPath(path) }}>
                 {
-                    isDelete == false &&
-                    <div className="d-flex d-flex align-items-center m-2">
+                    isDelete == false && isCut == false &&
+                    < div className="d-flex d-flex align-items-center m-2">
                         <div className="d-flex mx-3">
                             <div className="fs-2 text-warning">
                                 {type == '0' && <FiChevronDown onClick={() => handleChild(type, path)} className="text-black fs-4" />} {icons[type]}
@@ -55,7 +55,7 @@ const TreeNode = ({ node }) => {
                                         <EditView className="view-item-button bg-info" /></Button>
                                     }
                                     <div className="mx-2">
-                                        <Button><ContextMenu currObj={node} path={path} /></Button>
+                                        <Button><ContextMenu type={node.type} path={path} /></Button>
                                     </div>
                                 </div>
                             </div>

@@ -13,8 +13,7 @@ export const EditView = () => {
     const [isEdit, setIsEdit] = useState(false);
     const dishpatch = useDispatch();
     const selectedDirData = findDirObj(curPath, files);
-    console.log(selectedDirData);
-
+    console.log(selectedDirData)
     const handleName = useCallback((event) => {
         setName(event.target.value);
         setIsEdit(true)
@@ -25,9 +24,10 @@ export const EditView = () => {
         setDescripation(e.target.value);
     }, [setIsEdit, setDescripation]);
 
-    const editFileItem = useCallback((value) => {
-        dishpatch((editDir({ name: value })));
-    }, [dishpatch, name]);
+    const editFileItem = useCallback(() => {
+        let dirname = name.charAt(0).toUpperCase() + name.slice(1);
+        dishpatch((editDir({name:name})));
+    }, [name, selectedDirData, dishpatch, curPath, descripation]);
 
     return (
         <>
@@ -58,7 +58,7 @@ export const EditView = () => {
                         {
                             isEdit &&
                             <div className='card-footer d-flex align-items-center justify-content-end'>
-                                <Button variant="primary" onClick={() => editFileItem(name)}>Save</Button>
+                                <Button variant="primary" onClick={() => editFileItem()}>Save</Button>
                             </div>
                         }
                     </div>

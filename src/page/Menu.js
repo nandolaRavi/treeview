@@ -3,11 +3,11 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { FaEllipsisV } from "react-icons/fa";
 import { useDispatch, useSelector } from 'react-redux';
-import { pasteDir, setCopySourcePath } from '../redux/reducers/TreeViewSlice';
+import { pasteDir, setCopySourcePath, setCutSourePath } from '../redux/reducers/TreeViewSlice';
 
 
-const ContextMenu = ({ path }) => {
-    const sourcePath = useSelector((state) => state.treeView.sourcePath);
+const ContextMenu = ({ type, path }) => {
+    const { sourcePath, cutSourePath } = useSelector((state) => state.treeView);
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const dispatch = useDispatch();
@@ -18,13 +18,14 @@ const ContextMenu = ({ path }) => {
 
     const handleClose = useCallback(() => {
         setAnchorEl(null);
-    },[setAnchorEl]);
+    }, [setAnchorEl]);
 
     const handleCopy = useCallback((path) => {
         dispatch(setCopySourcePath(path))
     }, [dispatch, setAnchorEl]);
 
     const handleCut = useCallback(() => {
+        dispatch(setCutSourePath(path))
         setAnchorEl(null);
     }, [setAnchorEl]);
 
@@ -55,8 +56,7 @@ const ContextMenu = ({ path }) => {
                 >
                     <MenuItem onClick={() => handleCopy(path)}>copy</MenuItem>
                     <MenuItem onClick={handleCut}>cut</MenuItem>
-                    {sourcePath !== '' && sourcePath !== path && <MenuItem onClick={() => handlePaste(path)}>paste</MenuItem>}
-
+                    {(sourcePath !== '' && sourcePath !== path || cutSourePath !== path && cutSourePath !== '') && type === '0' && < MenuItem onClick={() => handlePaste(path)}>paste</MenuItem>}
                 </Menu>
             </div>
 
