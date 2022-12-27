@@ -76,7 +76,6 @@ export const findDirArray = (path, items = []) => {
 };
 
 const resstoreFileItem = (path, items = []) => {
-    debugger
     let fileItemObej = findDirObj(path, items);
     if (!fileItemObej) {
         return "Error";
@@ -124,20 +123,21 @@ const deleteFileItem = (path, items = []) => {
         let item = items[i];
         if (item.path === path) {
             item.isDelete = true;
-            if (Array.isArray(item.children) && item.children.length > 0) {
-                let children = item.children;
-                for (let j = 0; j < children.length; j++) {
-                    children[j].isDelete = true;
-                    if (children[j].type === '0') {
-                        deleteFileItem(children[j].path, children[j].children)
+            if (item.children.length > 0) {
+                for (let j = 0; j < item.children.length; j++) {
+                    let insideObj = item.children[j];
+                    insideObj.isDelete = true;
+                    if (insideObj.children.length > 0) {
+                        deleteFileItem(insideObj.path, insideObj.children);
                     }
-                }
-            }
-        }
+                };
+            };
+        };
         if (item.type === '0') {
             deleteFileItem(path, item.children)
-        }
-    }
+        };
+
+    };
 };
 
 const filterCutObject = (path, items = []) => {
@@ -209,31 +209,32 @@ const treeViewSlice = createSlice({
         },
         createFile: (state, action) => {
             let currObj = findDirObj(state.curPath, state.files);
-            if (!currObj.children.map(t => t.label).includes(action.payload.name)) {
-                let target = findDir(state.curPath, state.files);
-                if (!!Array.isArray(target)) {
-                    target.push(createFileItem(state.curPath, action.payload.name, "1", "", new Date()));
-                } else {
-                    alert("facing error to create dir path:" + state.curPath);
-                };
-            } else {
-                alert("already existsdir in:" + state.curPath)
+            if (currObj.children.map(t => t.label).includes(action.payload.name)) {
+                alert("already existsdir in:" + state.curPath);
+                return;
+            };
+            let target = findDir(state.curPath, state.files);
+            if (!Array.isArray(target)) {
+                alert("facing error to create dir path:" + state.curPath);
+                return;
             }
+            target.push(createFileItem(state.curPath, action.payload.name, "1", "", new Date()));
         },
         createDir: (state, action) => {
             let currObj = findDirObj(state.curPath, state.files);
-            if (!currObj.children.map(t => t.label).includes(action.payload.name)) {
-                let target = findDir(state.curPath, state.files);
-                if (!!Array.isArray(target)) {
-                    target.push(createFileItem(state.curPath, action.payload.name, "0", "", new Date()));
-                } else {
-                    alert("facing error to create dir path:" + state.curPath);
-                };
-            } else {
-                alert("already existsdir in:" + state.curPath)
+            if (currObj.children.map(t => t.label).includes(action.payload.name)) {
+                alert("already existsdir in:" + state.curPath);
+                return;
             }
+            let target = findDir(state.curPath, state.files);
+            if (!Array.isArray(target)) {
+                alert("facing error to create dir path:" + state.curPath);
+                return;
+            };
+            target.push(createFileItem(state.curPath, action.payload.name, "0", "", new Date()));
         },
         deleteDir: (state, action) => {
+            debugger
             deleteFileItem(action.payload.path, state.files);
         },
         restoreDir: (state, action) => {
@@ -241,12 +242,13 @@ const treeViewSlice = createSlice({
         },
         editDir: (state, action) => {
             let obj = findDirObj(action.payload.path, state.files);
-            if (obj) {
-                obj.label = action.payload.name;
-                obj.path = obj.parentpath + '/' + action.payload.name;
-                state.curPath = obj.type === '1' ? obj.parentpath : obj.path;
-                obj['updated_At'] = new Date().toDateString()
-            };
+            if (!obj) {
+                return;
+            }
+            obj.label = action.payload.name;
+            obj.path = obj.parentpath + '/' + action.payload.name;
+            state.curPath = obj.type === '1' ? obj.parentpath : obj.path;
+            obj['updated_At'] = new Date().toDateString();
         },
 
         setSearchText: (state, action) => {
@@ -277,7 +279,7 @@ const treeViewSlice = createSlice({
                     state.isConflict = true;
                     return;
                 };
-                sourceCutObjCopy.path = sourceCutObjCopy.path + '/' + sourceCutObjCopy.label;
+                sourceCutObjCopy.path = destinationFileObject.path + '/' + sourceCutObjCopy.label;
                 destinationFileObject.children.push(sourceCutObjCopy);
                 filterCutObject(state.cutSourePath, state.files);
                 return;
@@ -299,10 +301,9 @@ const treeViewSlice = createSlice({
             sourceFileObjectCopy.path = destinationFileObject.path + '/' + sourceFileObjectCopy.label;
             sourceFileObjectCopy.parentpath = destinationFileObject.path
             if (sourceFileObjectCopy.children.length > 0) {
-                for (let i = 0; i < sourceFileObjectCopy.children.length; i++) {
-                    const element = sourceFileObjectCopy.children[i];
+                sourceFileObjectCopy.forEach(element => {
                     element.path = sourceFileObjectCopy.path + '/' + element.label;
-                };
+                });
             };
 
             for (let j = 0; j < destinationFileObject.children.length; j++) {
@@ -313,6 +314,7 @@ const treeViewSlice = createSlice({
                     sourceFileObjectCopy.label = sourceFileObject.label + `(${existFileCount})`;
                 }
             };
+
             if (destChild && destChild.type === '0') {
                 state.isConflict = true;
                 return;
@@ -341,7 +343,7 @@ const treeViewSlice = createSlice({
                     let element = sourceCutObjCopy.children[i];
                     if (!child.children.map(t => t.label).includes(element.label)) {
                         element.path = child.path + '/' + sourceCutObjCopy.children[i].label;
-                        element.parentpath = child.path
+                        element.parentpath = child.path;
                         child.children.push(element);
                     };
                 };
@@ -350,6 +352,7 @@ const treeViewSlice = createSlice({
                 return;
             };
 
+            //files
             let sourceFileObject = findDirObj(state.sourcePath, state.files);
             let sourceFileObjectCopy = JSON.parse(JSON.stringify(sourceFileObject));
             if (!sourceFileObjectCopy) {
@@ -359,6 +362,7 @@ const treeViewSlice = createSlice({
             let destChild = destinationFileObject.children.find((fObj) => {
                 return fObj.label === sourceFileObjectCopy.label;
             });
+
             for (let i = 0; i < sourceFileObjectCopy.children.length; i++) {
                 const element = sourceFileObjectCopy.children[i];
                 if (!destChild.children.map(t => t.label).includes(element.label)) {
@@ -383,7 +387,8 @@ const treeViewSlice = createSlice({
                             element.path = conflictObject.path + '/' + sourceCutObjCopy.children[i].label;
                         };
                         conflictObject.children = sourceCutObjCopy.children;
-                    }
+                    };
+
                     filterCutObject(state.cutSourePath, state.files);
                     state.isConflict = false;
                     return;
@@ -397,6 +402,7 @@ const treeViewSlice = createSlice({
                     const element = sourceFileObjectCopy.children[i];
                     element.path = conflictObj.path + '/' + sourceFileObjectCopy.children[i].label;
                 };
+
                 conflictObj.children = sourceFileObjectCopy.children;
                 state.isConflict = false;
                 return;
@@ -415,9 +421,8 @@ const treeViewSlice = createSlice({
         setIsConflict: (state, action) => {
             state.isConflict = false;
         }
-    },
-
-})
+    }
+});
 
 export const { setPath, setCopySourcePath, setIsConflict, setInputMessage, setCutSourePath, createDir, replaseDir, createFile, mergeDir, setType, deleteDir, copyDir, cutDir, pasteDir, setSearchText, editDir, setEditSourePath, restoreDir, } = treeViewSlice.actions;
 

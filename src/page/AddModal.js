@@ -5,11 +5,10 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { createDir, createFile } from "../redux/reducers/TreeViewSlice";
 
 export const AddModal = () => {
-    const curPath = useSelector((state) => state.treeView.curPath);
     const [type, setType] = useState('');
     const [name, setName] = useState('');
     const [description, setDescripation] = useState('');
@@ -28,7 +27,6 @@ export const AddModal = () => {
 
     // CREATE NEW FILE ITEMS 
     const createItem = useCallback(() => {
-
         if (type === 'file') {
             dispatch(createFile({ name: name }));
             setShow(false);
@@ -41,7 +39,7 @@ export const AddModal = () => {
     return (
         <>
             <Button variant="primary" onClick={() => setShow(true)} className="p-2">
-                add
+                Add
             </Button>
             <Modal show={show} onHide={() => setShow(false)}>
                 <Modal.Header closeButton>
@@ -73,7 +71,7 @@ export const AddModal = () => {
                         < div className="m-1 w-100">
                             <textarea className="form-control " type="text" placeholder='Enter file contains' onChange={(e) => setDescripation(e.target.value)} />
                         </div>
-                    }
+                    };
                 </Modal.Body>
                 <Modal.Footer>
                     <Button onClick={() => setShow(false)} className='text-white bg-danger'>Close</Button>

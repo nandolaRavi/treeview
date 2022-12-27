@@ -7,7 +7,7 @@ const Recybin = ({ trashData }) => {
   const icons = [<FaFolderOpen />, <FaFile />];
   const dispatch = useDispatch();
 
-  const hadleRestoreItem = useCallback((path, type, parentpath) => {
+  const hadleRestoreItem = useCallback((path, type  ) => {
     dispatch(restoreDir({ path: path }));
     dispatch(setType({ type: type }));
     dispatch(setPath({ path: 'Home' }));

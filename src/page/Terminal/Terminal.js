@@ -8,13 +8,14 @@ export function createCommand(cmdName, numberOfargs, fn) {
 };
 
 
-//this will create a new terminal
+//this will create a new terminal;
+
 export default function createTerminal() {
     return {
         commands: [],
         history: [],
         prompt1: "$",
-        prompt2: "/homedfsdfsdf",
+        prompt2: "",
         outputLines: [],
         dirArry: [],
         subscribe: function () {
@@ -46,12 +47,15 @@ export default function createTerminal() {
         setPrompt: function (decor) {
             this.prompt2 = decor;
         },
+
         getPrompt: function () {
             return this.prompt2 + this.prompt1;
         },
+
         setUserInput: function (input) {
             this.userInput = input;
         },
+
         isValidCommand: function (cmdName) {
             return this.commands.map(t => t.name).includes(cmdName);
         },
@@ -81,10 +85,10 @@ export default function createTerminal() {
                 this.printLine(userCommand + " : " + " Too many argument provided ");
                 return;
             };
-
             cmd.process(inputData.splice(1, inputData.length), this);
-            this.history.push(this.userInput)
+            this.history.push(this.userInput);
         },
+
         processUserInput: function () {
             let inputData = this.userInput.trim().split(" ");
             let operators = inputData.filter((item) => { return item === '&&' || item === '||' });
@@ -98,11 +102,10 @@ export default function createTerminal() {
                 exeMode = 'PARA'
             }
 
-            //now we have to spit user input by spitort
+            //now we have to spit user input by spitort;
             let oprtIndex = this.userInput.indexOf(spitOprt);
             let cmd1 = this.userInput.slice(0, oprtIndex).trim();
             let cmd2 = this.userInput.slice(oprtIndex + 2, this.userInput.length).trim();
-            console.log("cmd1", cmd1, "cmd2", cmd2);
             if (exeMode === 'SEQ') {
                 this.process(cmd1)
                 setTimeout(() => {
@@ -110,16 +113,14 @@ export default function createTerminal() {
                     this.processUserInput();
                 }, 1)
                 return;
-            }
+            };
             setTimeout(() => {
                 this.process(cmd1);
             }, 1)
             setTimeout(() => {
                 this.userInput = cmd2;
                 this.processUserInput();
-            }, 1)
-
-
+            }, 1);
         }
     };
 };

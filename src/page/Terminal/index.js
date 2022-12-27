@@ -1,4 +1,4 @@
-import _, { create } from "lodash";
+import _ from "lodash";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
@@ -107,7 +107,7 @@ const registerTerminalCommands = (_curState, dispatch) => {
     myTerminal.addCommand(createCommand("touch", 1, touch));
     myTerminal.addCommand(createCommand("pwd", 0, pwd));
     myTerminal.addCommand(createCommand("rm", 1, rm));
-    myTerminal.addCommand(createCommand('history', 0, history))
+    myTerminal.addCommand(createCommand('history', 0, history));
     myTerminal.addCommand(createCommand('cls', 0, clearFn));
 }
 
@@ -146,6 +146,7 @@ const Terminal = () => {
             document.addEventListener("click", handleClickOutside)
         }, [ref]);
     };
+
     useOutsideAlerter(inputElement);
 
     return <>
