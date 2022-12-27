@@ -1,16 +1,18 @@
 import { useSelector } from 'react-redux';
 import { AddModal } from './AddModal';
 import { useCallback, useEffect, useState } from 'react';
-import { setSearchText, mergeDir, replaseDir, setPath } from '../redux/reducers/TreeViewSlice';
+import { setSearchText } from '../redux/reducers/TreeViewSlice';
 import { useDispatch } from 'react-redux';
 import TabsPage from './TabsPage.js';
 import React from 'react';
 import { Link } from 'react-router-dom';
+import Alert from './Alert';
 
 const Home = () => {
     const dispatch = useDispatch();
     const { files, isConflict, curPath } = useSelector((state) => state.treeView)
     const [treeData, setTreeData] = useState(files);
+    const [modalShow, setModalShow] = React.useState(true);
 
     useEffect(() => {
         setTreeData(files);
@@ -20,24 +22,13 @@ const Home = () => {
         dispatch(setSearchText({ text: text }))
     }, [dispatch,])
 
-    const handleMerge = useCallback(() => {
-        dispatch(mergeDir());
-    }, [dispatch]);
-
-    const handleRepalse = useCallback(() => {
-        dispatch(replaseDir());
-    }, [dispatch]);
-
     return (
         <>
             {isConflict &&
-                <div>
-                    File or folder already exist on destination path,
-                    <button className='btn btn-primary' onClick={() => handleMerge()}>Merge</button>
-                    <button className='btn btn-secondary' onClick={() => handleRepalse()}>Replace</button>
-                </div>
-            }
-            <div>
+                <Alert
+                    show={modalShow}
+                />
+            }            <div>
                 <div className='m-2 p-3 bg-info d-flex w-100 justify-content-between'>
                     <div className='w-25'>
                         <input className='form-control' onKeyUp={(e) => handleSearch(e.target.value)} placeholder="Search..." type='text' />

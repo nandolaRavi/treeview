@@ -22,15 +22,18 @@ const ContextMenu = ({ type, path }) => {
 
     const handleCopy = useCallback((path) => {
         dispatch(setCopySourcePath(path))
+        setAnchorEl(null);
     }, [dispatch, setAnchorEl]);
 
     const handleCut = useCallback(() => {
         dispatch(setCutSourePath(path))
         setAnchorEl(null);
-    }, [setAnchorEl]);
+    }, [setAnchorEl, dispatch]);
 
     const handlePaste = useCallback((path) => {
-        dispatch(pasteDir({ path: path }))
+        dispatch(pasteDir({ path: path }));
+        setAnchorEl(null);
+
     }, [dispatch, setAnchorEl])
 
     return (

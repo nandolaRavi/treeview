@@ -245,6 +245,7 @@ const treeViewSlice = createSlice({
                 obj.label = action.payload.name;
                 obj.path = obj.parentpath + '/' + action.payload.name;
                 state.curPath = obj.type === '1' ? obj.parentpath : obj.path;
+                obj['updated_At'] = new Date().toDateString()
             };
         },
 
@@ -257,38 +258,44 @@ const treeViewSlice = createSlice({
         },
 
         pasteDir: (state, action) => {
-            let existFileCount = 0;
             state.destinationPath = action.payload.path;
-            let sourceFileObject = findDirObj(state.sourcePath, state.files);
-            let sourceCutObj = findDirObj(state.cutSourePath, state.files);
-            let sourceCutObjCopy = JSON.parse(JSON.stringify(sourceCutObj));
-            let sourceFileObjectCopy = JSON.parse(JSON.stringify(sourceFileObject));
             let destinationFileObject = findDirObj(state.destinationPath, state.files);
             if (!destinationFileObject) {
                 alert("Error : invalid destination path");
                 return;
             };
+
+            let child = {};
+
             if (state.cutSourePath !== '') {
-                let child = destinationFileObject.children.find((fObj) => {
+                let sourceCutObj = findDirObj(state.cutSourePath, state.files);
+                let sourceCutObjCopy = JSON.parse(JSON.stringify(sourceCutObj));
+                child = destinationFileObject.children.find((fObj) => {
                     return fObj.label === sourceCutObjCopy.label;
                 });
-                sourceCutObjCopy.path = sourceCutObjCopy.path + '/' + sourceCutObjCopy.label;
-                destinationFileObject.children.push(sourceCutObjCopy);
-                filterCutObject(state.cutSourePath, state.files);
                 if (child && child.type === '0') {
                     state.isConflict = true;
                     return;
                 };
+                sourceCutObjCopy.path = sourceCutObjCopy.path + '/' + sourceCutObjCopy.label;
+                destinationFileObject.children.push(sourceCutObjCopy);
+                filterCutObject(state.cutSourePath, state.files);
                 return;
-            }
+            };
+
+            //copy
+            let sourceFileObject = findDirObj(state.sourcePath, state.files);
+            let existFileCount = 0;
+
+            let sourceFileObjectCopy = JSON.parse(JSON.stringify(sourceFileObject));
             if (!sourceFileObjectCopy) {
                 alert("Error : invalid source path");
                 return;
-            }
-
+            };
             let destChild = destinationFileObject.children.find((fObj) => {
                 return fObj.label === sourceFileObjectCopy.label;
             });
+
             sourceFileObjectCopy.path = destinationFileObject.path + '/' + sourceFileObjectCopy.label;
             sourceFileObjectCopy.parentpath = destinationFileObject.path
             if (sourceFileObjectCopy.children.length > 0) {
@@ -314,10 +321,6 @@ const treeViewSlice = createSlice({
         },
 
         mergeDir: (state) => {
-            let sourceCutObj = findDirObj(state.cutSourePath, state.files);
-            let sourceCutObjCopy = JSON.parse(JSON.stringify(sourceCutObj));
-            let sourceFileObject = findDirObj(state.sourcePath, state.files);
-            let sourceFileObjectCopy = JSON.parse(JSON.stringify(sourceFileObject));
             let destinationFileObject = findDirObj(state.destinationPath, state.files);
             if (!destinationFileObject) {
                 alert("Error : invalid destination path");
@@ -325,11 +328,17 @@ const treeViewSlice = createSlice({
             };
 
             if (state.cutSourePath !== '') {
+                let sourceCutObj = findDirObj(state.cutSourePath, state.files);
+                if (!sourceCutObj) {
+                    alert("Error : invalid cutSource path");
+                    return;
+                };
+                let sourceCutObjCopy = JSON.parse(JSON.stringify(sourceCutObj));
                 let child = destinationFileObject.children.find((fObj) => {
                     return fObj.label === sourceCutObjCopy.label;
                 });
                 for (let i = 0; i < sourceCutObjCopy.children.length; i++) {
-                    const element = sourceCutObjCopy.children[i];
+                    let element = sourceCutObjCopy.children[i];
                     if (!child.children.map(t => t.label).includes(element.label)) {
                         element.path = child.path + '/' + sourceCutObjCopy.children[i].label;
                         element.parentpath = child.path
@@ -337,8 +346,12 @@ const treeViewSlice = createSlice({
                     };
                 };
                 filterCutObject(state.cutSourePath, state.files);
+                state.isConflict = false;
                 return;
             };
+
+            let sourceFileObject = findDirObj(state.sourcePath, state.files);
+            let sourceFileObjectCopy = JSON.parse(JSON.stringify(sourceFileObject));
             if (!sourceFileObjectCopy) {
                 alert("Error : invalid source path");
                 return;
@@ -351,32 +364,44 @@ const treeViewSlice = createSlice({
                 if (!destChild.children.map(t => t.label).includes(element.label)) {
                     element.path = destChild.path + '/' + sourceFileObjectCopy.children[i].label;
                     destChild.children.push(element);
-                    state.isConflict = true;
-                    return;
                 };
             };
+            state.isConflict = false;
         },
 
         replaseDir: (state) => {
-            let sourceCutObj = findDirObj(state.cutSourePath, state.files);
-            let sourceCutObjCopy = JSON.parse(JSON.stringify(sourceCutObj));
             let destObj = findDirObj(state.destinationPath, state.files);
             if (!!destObj) {
+                if (state.cutSourePath !== '') {
+                    let sourceCutObj = findDirObj(state.cutSourePath, state.files);
+                    let sourceCutObjCopy = JSON.parse(JSON.stringify(sourceCutObj));
+                    let conflictObject = destObj.children.find(t => { return t.label == sourceCutObjCopy.label });
+
+                    if (sourceCutObjCopy.children.length > 0) {
+                        for (let i = 0; i < sourceCutObjCopy.children.length; i++) {
+                            let element = sourceCutObjCopy.children[i];
+                            element.path = conflictObject.path + '/' + sourceCutObjCopy.children[i].label;
+                        };
+                        conflictObject.children = sourceCutObjCopy.children;
+                    }
+                    filterCutObject(state.cutSourePath, state.files);
+                    state.isConflict = false;
+                    return;
+                };
+
                 let srcObj = findDirObj(state.sourcePath, state.files);
                 let sourceFileObjectCopy = JSON.parse(JSON.stringify(srcObj));
                 let conflictObj = destObj.children.find(t => { return t.label == sourceFileObjectCopy.label });
 
-                sourceFileObjectCopy.children.forEach(t => {
-                    t.path = conflictObj.path + '/' + t.label;
-                });
                 for (let i = 0; i < sourceFileObjectCopy.children.length; i++) {
                     const element = sourceFileObjectCopy.children[i];
                     element.path = conflictObj.path + '/' + sourceFileObjectCopy.children[i].label;
                 };
                 conflictObj.children = sourceFileObjectCopy.children;
+                state.isConflict = false;
+                return;
             }
             alert("Error : invalid  destobj");
-            return;
         },
 
         setCopySourcePath: (state, action) => {
@@ -386,11 +411,14 @@ const treeViewSlice = createSlice({
 
         setCutSourePath: (state, action) => {
             state.cutSourePath = action.payload;
+        },
+        setIsConflict: (state, action) => {
+            state.isConflict = false;
         }
     },
 
 })
 
-export const { setPath, setCopySourcePath, setInputMessage, setCutSourePath, createDir, replaseDir, createFile, mergeDir, setType, deleteDir, copyDir, cutDir, pasteDir, setSearchText, editDir, setEditSourePath, restoreDir, } = treeViewSlice.actions;
+export const { setPath, setCopySourcePath, setIsConflict, setInputMessage, setCutSourePath, createDir, replaseDir, createFile, mergeDir, setType, deleteDir, copyDir, cutDir, pasteDir, setSearchText, editDir, setEditSourePath, restoreDir, } = treeViewSlice.actions;
 
 export default treeViewSlice.reducer;

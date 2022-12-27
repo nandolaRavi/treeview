@@ -12,7 +12,7 @@ import "../css/TreeNode.css"
 
 const TreeNode = ({ node }) => {
     const searchkeyword = useSelector((state) => state.treeView.serachKeyWord);
-    const { children, label, path, type, isDelete, isCut } = node;
+    const { children, label, path, type, isDelete, isCut, parentpath } = node;
     const [showChildren, setShowChildren] = useState(true);
     const icons = [<FaFolderOpen />, <FaFile />];
     const dispatch = useDispatch();
@@ -25,9 +25,10 @@ const TreeNode = ({ node }) => {
         dispatch(setPath({ path: path }));
     }, [setShowChildren, dispatch, path, type]);
 
-    const hanldeDeleteItem = useCallback((path) => {
+    const hanldeDeleteItem = useCallback((path, parentpath) => {
         dispatch(deleteDir({ path: path }));
-    }, [dispatch, path]);
+        dispatch(setPath({ path: parentpath }));
+    }, [dispatch, path, parentpath]);
 
     return (
         <>
@@ -44,7 +45,7 @@ const TreeNode = ({ node }) => {
                                     <h5 className={label.toLowerCase().includes(searchkeyword) > 0 && searchkeyword !== '' ? 'highlights' : ''}>{label}</h5>
                                 </div>
                                 <div className="main-container d-flex">
-                                    <div className="mx-2" onClick={() => hanldeDeleteItem(path)}>
+                                    <div className="mx-2" onClick={() => hanldeDeleteItem(path, parentpath)}>
                                         {path !== 'Home' && <Button variant="danger">
                                             <FaTrashAlt className="delete-item-button text-white" /></Button>
                                         }

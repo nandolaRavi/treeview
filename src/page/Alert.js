@@ -1,40 +1,46 @@
-import { useCallback } from "react";
-import { Button, Modal } from "react-bootstrap";
-import { useDispatch } from "react-redux";
-import { mergeDir, replaseDir } from "../redux/reducers/TreeViewSlice";
-const AlertModal = (props) => {
-    const dispatch = useDispatch();
+import { useCallback } from 'react';
+import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
+import { useDispatch } from 'react-redux';
+import { mergeDir, replaseDir, setIsConflict } from '../redux/reducers/TreeViewSlice';
+import { GoX } from "react-icons/go";
 
+function Alert(props) {
+    const dispatch = useDispatch();
     const handleMerge = useCallback(() => {
         dispatch(mergeDir());
     }, [dispatch]);
 
     const handleRepalse = useCallback(() => {
-        dispatch(replaseDir())
+        dispatch(replaseDir());
     }, [dispatch]);
 
+    const hanldeClose = useCallback(() => {
+        dispatch(setIsConflict())
+    });
     return (
         <Modal
+            {...props}
             size="lg"
             aria-labelledby="contained-modal-title-vcenter"
-            show={true}
         >
-            <Modal.Header closeButton>
+            <Modal.Header className='w-100'>
                 <Modal.Title id="contained-modal-title-vcenter">
-                    paste
+                    Merge && Repalse
                 </Modal.Title>
+                <GoX className='fs-2 text-danger' onClick={hanldeClose} />
             </Modal.Header>
             <Modal.Body>
-                <h4>
+                <p>
                     File or folder already exist on destination path,
-                </h4>
+                </p>
             </Modal.Body>
             <Modal.Footer>
-                <Button onClick={handleMerge()} className='btn btn-primary'>Mareg</Button>
-                <Button onClick={handleRepalse()} className='btn btn-secondary'>Replase</Button>
+                <Button variant='info' onClick={() => handleMerge()}><b>Merge</b></Button>
+                <Button variant='secondary' onClick={() => handleRepalse()}><b>Repalse</b></Button>
 
             </Modal.Footer>
         </Modal>
     );
 }
-export default AlertModal
+export default Alert
