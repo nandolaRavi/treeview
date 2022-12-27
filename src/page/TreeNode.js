@@ -12,47 +12,45 @@ import "../css/TreeNode.css"
 
 const TreeNode = ({ node }) => {
     const searchkeyword = useSelector((state) => state.treeView.serachKeyWord);
-    const { children, label, path, type, isDelete,isCut } = node;
+    const { children, label, path, type, isDelete, isCut } = node;
     const [showChildren, setShowChildren] = useState(true);
     const icons = [<FaFolderOpen />, <FaFile />];
     const dispatch = useDispatch();
 
-    const handleChild = useCallback((type, path) => {
+    const handleShowChild = useCallback(() => {
         setShowChildren(!showChildren);
+    }, [showChildren])
+    const handleChild = useCallback((type, path) => {
         dispatch(setType({ type: type }));
         dispatch(setPath({ path: path }));
-    }, [setShowChildren, dispatch, path, type, showChildren]);
+    }, [setShowChildren, dispatch, path, type]);
 
     const hanldeDeleteItem = useCallback((path) => {
         dispatch(deleteDir({ path: path }));
     }, [dispatch, path]);
 
-    const handleCurrPath = useCallback((path) => {
-        dispatch(setPath({ path: path }));
-    }, [dispatch, path]);
-
     return (
         <>
-            <div style={{ marginBottom: "5px" }} onClick={() => { handleCurrPath(path) }}>
+            <div style={{ marginBottom: "5px" }}>
                 {
                     isDelete == false && isCut == false &&
                     < div className="d-flex d-flex align-items-center m-2">
                         <div className="d-flex mx-3">
                             <div className="fs-2 text-warning">
-                                {type == '0' && <FiChevronDown onClick={() => handleChild(type, path)} className="text-black fs-4" />} {icons[type]}
+                                {type == '0' && <FiChevronDown onClick={handleShowChild} className="text-black fs-4" />} {icons[type]}
                             </div>
                             <div className="p-2 mt-2 d-flex align-items-center">
-                                <div>
+                                <div onClick={() => handleChild(type, path)}>
                                     <h5 className={label.toLowerCase().includes(searchkeyword) > 0 && searchkeyword !== '' ? 'highlights' : ''}>{label}</h5>
                                 </div>
                                 <div className="main-container d-flex">
-                                    <div className="mx-2">
+                                    <div className="mx-2" onClick={() => hanldeDeleteItem(path)}>
                                         {path !== 'Home' && <Button variant="danger">
-                                            <FaTrashAlt onClick={() => hanldeDeleteItem(path)} className="delete-item-button text-white" /></Button>
+                                            <FaTrashAlt className="delete-item-button text-white" /></Button>
                                         }
                                     </div>
                                     {path !== 'Home' && <Button variant="info">
-                                        <EditView className="view-item-button bg-info" /></Button>
+                                        <EditView className="view-item-button bg-info" currObj={node} /></Button>
                                     }
                                     <div className="mx-2">
                                         <Button><ContextMenu type={node.type} path={path} /></Button>
